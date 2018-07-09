@@ -120,7 +120,7 @@ void UpdatePlayer(void)
 			player->bullet_num = ++player->bullet_num % BULLET_MAX;
 			//switch (player->bullet_num) {
 			//case 0:
-			//	OutputDebugStringA("0 ");
+			//	OutputDebugStringA("0 ")
 			//	break;
 			//case 1:
 			//	OutputDebugStringA("1 ");
