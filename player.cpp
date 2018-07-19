@@ -46,6 +46,8 @@ HRESULT InitPlayer(void)
 	PLAYER *player = GetPlayer(0);	// プレイヤー０番のアドレスを取得する	
 	//player->g_posPlayer = D3DXVECTOR3(SCREEN_WIDTH - TEXTURE_SAMPLE00_SIZE_X/2, SCREEN_CENTER_Y - TEXTURE_SAMPLE00_SIZE_Y/2, 0.0f);
 	player->g_posPlayer = D3DXVECTOR3(SCREEN_CENTER_X - TEXTURE_SAMPLE00_SIZE_X / 2, SCREEN_CENTER_Y - TEXTURE_SAMPLE00_SIZE_Y / 2, 0.0f);
+
+	player->g_posPlayer = D3DXVECTOR3(SCREEN_CENTER_X + TEXTURE_SAMPLE00_SIZE_X / 2, SCREEN_CENTER_Y + TEXTURE_SAMPLE00_SIZE_Y / 2, 0.0f);
 	player->g_rotPlayer = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	player->g_nCountAnim = 0;
 	player->g_nPatternAnim = 0;
@@ -78,7 +80,7 @@ void UpdatePlayer(void)
 	//player->bullet_num = 0;
 	
 	// アニメーション
-	player->g_nCountAnim = (player->g_nCountAnim +1) % TEXTURE_PATTERN_DIVIDE_X;
+	//player->g_nCountAnim = (player->g_nCountAnim +1) % TEXTURE_PATTERN_DIVIDE_X;
 	player->g_nPatternAnim = (player->g_nPatternAnim + 1) % ANIM_PATTERN_NUM;
 	if (player->g_posPlayer.x < 0) 
 	{
@@ -114,11 +116,11 @@ void UpdatePlayer(void)
 		//BULLET *bullet = GetBullet(player->bullet_num % BULLET_MAX);
 		//while (!bullet->use) {
 			//OutputDebugStringA("\nSPACE\n");			
-			BULLET *bullet = GetBullet(player->bullet_num );
-			//Sleep(100);
-			bullet->use = TRUE;
-			player->bullet_num = ++player->bullet_num % BULLET_MAX;
-			//switch (player->bullet_num) {
+		BULLET *bullet = GetBullet(player->bullet_num );
+		//Sleep(20);
+		bullet->use = TRUE;
+		player->bullet_num = (++player->bullet_num % (BULLET_MAX));
+		//switch (player->bullet_num) {
 			//case 0:
 			//	OutputDebugStringA("0 ")
 			//	break;
@@ -163,18 +165,12 @@ void UpdatePlayer(void)
 void DrawPlayer(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
-
 	// テクスチャの設定
 	pDevice->SetTexture( 0, g_pD3DTexturePlayer );
-
 	// ポリゴンの描画
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWk, sizeof(VERTEX_2D));
-
-
-	
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWk, sizeof(VERTEX_2D));	
 }
 
 //=============================================================================

@@ -9,7 +9,7 @@
 #include "enemy.h"
 #include "input.h"
 #include "bullet.h"
-
+#include "score.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -287,6 +287,7 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	InitEnemy();
 	InitPlayer();
 	InitBullet();
+	InitScore();
 	return S_OK;
 }
 
@@ -308,6 +309,7 @@ void Uninit(void)
 	UninitEnemy();
 	UninitPlayer();
 	UninitBullet();
+	UninitScore();
 	// 入力処理の終了処理
 	UninitInput();
 }
@@ -323,7 +325,10 @@ void Update(void)
 	UpdateEnemy();
 	UpdatePlayer();
 	UpdateBullet();
-	
+	//当たり判定	
+	HitTest();
+	//スコアの更新処理	
+	UpdateScore();	
 }
 
 //=============================================================================
@@ -339,7 +344,8 @@ void Draw(void)
 		// ポリゴンの描画処理
 		DrawEnemy();		
 		DrawBullet();		
-		DrawPlayer();		
+		DrawPlayer();
+		DrawScore();
 #ifdef _DEBUG
 		// FPS表示
 		DrawFPS();
@@ -372,3 +378,30 @@ void DrawFPS(void)
 	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
 }
 #endif
+//=============================================================================
+// 当たり判定関数
+//=============================================================================
+void HitTest(void)
+{
+	PLAYER *player = GetPlayer(0);
+	ENEMY  *enemy = GetEnemy(0);
+	//SCORE *score = GetScore(0);
+	for (int i = 0; i < player->bullet_num + 1; i++) {
+		BULLET *bullet = GetBullet(i);		
+		if (bullet->use) {
+			//OutputDebugStringA("B ");
+			if (((bullet->g_posBullet.x + TEXTURE_SAMPLE00_SIZE_X3) > enemy->g_posEnemy.x) &&
+				((bullet->g_posBullet.x) < enemy->g_posEnemy.x + TEXTURE_SAMPLE00_SIZE_X2))  //横だけ当たり
+			{
+				if (((bullet->g_posBullet.y + TEXTURE_SAMPLE00_SIZE_Y3) > enemy->g_posEnemy.y) &&
+					((bullet->g_posBullet.y) < enemy->g_posEnemy.y + TEXTURE_SAMPLE00_SIZE_Y2))  //横と縱当たり
+				{				
+					//スコア
+ 					player->score = player->score + 1;
+					bullet->use = FALSE;
+					//enemy->use = FALSE;
+				}
+			}
+		}
+	}
+}

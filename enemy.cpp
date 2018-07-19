@@ -24,7 +24,6 @@ void SetTextureEnemy( int cntPattern );	//
 // グローバル変数
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTextureEnemy = NULL;		// テクスチャへのポリゴン
-
 VERTEX_2D				g_vertexWk2[NUM_VERTEX];		// 頂点情報格納ワーク
 
 //D3DXVECTOR3				enemy->g_posEnemy;			// ポリゴンの移動量
@@ -45,21 +44,16 @@ HRESULT InitEnemy(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	ENEMY *enemy = GetEnemy(0);	
-
 	enemy->g_posEnemy = D3DXVECTOR3(0, SCREEN_CENTER_Y - TEXTURE_SAMPLE00_SIZE_Y2/2, 0.0f);
 	enemy->g_rotEnemy = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-
 	enemy->g_nCountAnim2  = 0;
 	enemy->g_nPatternAnim2 = 0;
-
 	// 頂点情報の作成
 	MakeVertexEnemy();
-
 	// テクスチャの読み込み
 	D3DXCreateTextureFromFile( pDevice,		// デバイスのポインタ
 		TEXTURE_GAME_SAMPLE002,				// ファイルの名前
-		&g_pD3DTextureEnemy );			// 読み込むメモリのポインタ
-
+		&g_pD3DTextureEnemy );				// 読み込むメモリのポインタ
 	return S_OK;
 }
 
@@ -109,19 +103,19 @@ void UpdateEnemy(void)
 		enemy->g_posEnemy.y = 0;
 	}
 
-	 //入力対応
-	if (GetKeyboardPress(DIK_DOWN)) {
-		enemy->g_posEnemy.y += 2;
-	}
-	if (GetKeyboardPress(DIK_UP)) {
-		enemy->g_posEnemy.y -= 2;
-	}
-	if (GetKeyboardPress(DIK_LEFT)) {
-		enemy->g_posEnemy.x -= 2;
-	}
-	if (GetKeyboardPress(DIK_RIGHT)) {
-		enemy->g_posEnemy.x += 2;
-	}
+	// //入力対応
+	//if (GetKeyboardPress(DIK_DOWN)) {
+	//	enemy->g_posEnemy.y += 2;
+	//}
+	//if (GetKeyboardPress(DIK_UP)) {
+	//	enemy->g_posEnemy.y -= 2;
+	//}
+	//if (GetKeyboardPress(DIK_LEFT)) {
+	//	enemy->g_posEnemy.x -= 2;
+	//}
+	//if (GetKeyboardPress(DIK_RIGHT)) {
+	//	enemy->g_posEnemy.x += 2;
+	//}
 
 	MakeVertexEnemy();
 }
@@ -131,16 +125,19 @@ void UpdateEnemy(void)
 //=============================================================================
 void DrawEnemy(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	ENEMY  *enemy = GetEnemy(0);
+	if (enemy->use) {
+		LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
+		// 頂点フォーマットの設定
+		pDevice->SetFVF(FVF_VERTEX_2D);
 
-	// テクスチャの設定
-	pDevice->SetTexture( 0, g_pD3DTextureEnemy );
+		// テクスチャの設定
+		pDevice->SetTexture(0, g_pD3DTextureEnemy);
 
-	// ポリゴンの描画
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWk2, sizeof(VERTEX_2D));
+		// ポリゴンの描画
+		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWk2, sizeof(VERTEX_2D));
+	}
 }
 
 //=============================================================================

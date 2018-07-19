@@ -44,7 +44,8 @@
 #define	NAME_MAX	(256)		// 名前BufのMAX
 #define PLAYER_MAX	(1)			// プレイヤーの数
 #define ENEMY_MAX	(1)			// 敵の数
-#define BULLET_MAX	(100)			// Bulletの数
+#define BULLET_MAX	(200)		// Bulletの数
+#define SCORE_MAX	(5)			// Scoreの数
 #define MAP_MAX     (1)			// Mapの数
 
 /*******************************************************************************
@@ -72,6 +73,7 @@ typedef struct
 
 
 LPDIRECT3DDEVICE9 GetDevice(void);		// デバイス取得関数
-
+void HitTest(void);
+void AddScore(void);
 
 #endif

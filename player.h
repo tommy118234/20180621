@@ -49,8 +49,15 @@ typedef struct					// キャラクターの基本構造体
 
 	float					g_fRadiusPlayer;					// ポリゴンの半径
 	float					g_fBaseAnglePlayer;					// ポリゴンの角度
+
+	/*
+	g_fBaseAnglePolygon = Atan2f(120,80)
+	D3DXVECTOR2 temp= D3DXVECTOR2()
+	*/
+
 	int						direction = -1;
 	int						bullet_num = 0;
+	int						score = 0;
 } PLAYER;
 
 //*****************************************************************************

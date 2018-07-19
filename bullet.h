@@ -13,32 +13,36 @@
 #define TEXTURE_SAMPLE00_SIZE_X3	(22) // テクスチャサイズ
 #define TEXTURE_SAMPLE00_SIZE_Y3	(60) // 同上
 
-#define TEXTURE_PATTERN_DIVIDE_X3	(1)	// アニメパターンのテクスチャ内分割数（X)
-#define TEXTURE_PATTERN_DIVIDE_Y3	(1)	// アニメパターンのテクスチャ内分割数（Y)
+#define TEXTURE_PATTERN_DIVIDE_X3	(1)														// アニメパターンのテクスチャ内分割数（X)
+#define TEXTURE_PATTERN_DIVIDE_Y3	(1)														// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM3			(TEXTURE_PATTERN_DIVIDE_X3*TEXTURE_PATTERN_DIVIDE_Y3)	// アニメーションパターン数
-#define TIME_ANIMATION				(50)	// アニメーションの切り替わるカウント
+#define TIME_ANIMATION				(50)													// アニメーションの切り替わるカウント
 
 /*******************************************************************************
 * 構造体定義
 ********************************************************************************/
 typedef struct					// キャラクターの基本構造体
 {
-	CHARACTER	status;			// 共通パラメーター
+	//CHARACTER	status;			// 共通パラメーター
 
-								//LPDIRECT3DTEXTURE9		g_pD3DTexturePlayer = NULL;		// テクスチャへのポリゴン
-								//
-								//VERTEX_2D				g_vertexWk[NUM_VERTEX];				// 頂点情報格納ワーク
+	//LPDIRECT3DTEXTURE9	g_pD3DTexturePlayer = NULL;			// テクスチャへのポリゴン
+	//
+	//VERTEX_2D				g_vertexWk[NUM_VERTEX];				// 頂点情報格納ワーク
 	D3DXVECTOR3				g_posBullet;						// ポリゴンの移動量
-	D3DXVECTOR3				g_rotBullet;						// ポリゴンの回転量
+	bool					use = FALSE;
 	int						g_nCountAnim;						// アニメーションカウント
 	int						g_nPatternAnim;						// アニメーションパターンナンバー
 
+
+
+	D3DXVECTOR3				g_rotBullet;						// ポリゴンの回転量
 	float					g_fRadiusBullet;					// ポリゴンの半径
 	float					g_fBaseAngleBullet;					// ポリゴンの角度
 
-	LPDIRECT3DTEXTURE9		g_pD3DTextureBullet = NULL;		// テクスチャへのポリゴン
-	VERTEX_2D				g_vertexWk[NUM_VERTEX];		// 頂点情報格納ワーク
-	bool					use = FALSE;
+	LPDIRECT3DTEXTURE9		g_pD3DTextureBullet = NULL;			// テクスチャへのポリゴン
+	VERTEX_2D				g_vertexWk[NUM_VERTEX];				// 頂点情報格納ワーク
+	
+	//int						direction = -1;
 } BULLET;
 
 //*****************************************************************************

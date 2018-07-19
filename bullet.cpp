@@ -8,40 +8,27 @@
 #include "player.h"
 #include "bullet.h"
 #include "input.h"
-
-#include "stdio.h"
 //#include <Windows.h>
-
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-
-
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT MakeVertexBullet(void);
 void SetVertexBullet(void);
-void SetTextureBullet(int cntPattern);	//									
-//LPDIRECT3DTEXTURE9		bullet->g_pD3DTextureBullet = NULL;		// テクスチャへのポリゴン
-//VERTEX_2D				bullet->g_vertexWk[NUM_VERTEX];		// 頂点情報格納ワーク
-											
-
+void SetTextureBullet(int cntPattern);
 BULLET	 bullet[BULLET_MAX];
 //=============================================================================
 // 初期化処理
 //=============================================================================
 HRESULT InitBullet(void)
 {
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	PLAYER *player = GetPlayer(0);
 	for (int i = 0; i < BULLET_MAX; i++) {
-
-		LPDIRECT3DDEVICE9 pDevice = GetDevice();
-		PLAYER *player = GetPlayer(0);
 		BULLET *bullet = GetBullet(i);
-		bullet->g_posBullet = D3DXVECTOR3(player->g_posPlayer.x + TEXTURE_SAMPLE00_SIZE_X / 2, player->g_posPlayer.y, 0.0f);
-		//bullet->g_rotBullet = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		//bullet->g_nCountAnim = 0;
-		//bullet->g_nPatternAnim = 0;
+		bullet->g_posBullet = D3DXVECTOR3(player->g_posPlayer.x , player->g_posPlayer.y, 0.0f);
 		bullet->use = FALSE;
 		// 頂点情報の作成
 		MakeVertexBullet();
@@ -52,21 +39,17 @@ HRESULT InitBullet(void)
 	}
 	return S_OK;
 }
-
 //=============================================================================
 // 終了処理
 //=============================================================================
 void UninitBullet(void)
 {
-	for (int i = 0; i < BULLET_MAX; i++) {
-		if (bullet->g_pD3DTextureBullet != NULL)	//
-		{	// テクスチャの開放
-			bullet->g_pD3DTextureBullet->Release();
-			bullet->g_pD3DTextureBullet = NULL;
-		}
-	}
+	if (bullet->g_pD3DTextureBullet != NULL)	//
+	{	// テクスチャの開放
+		bullet->g_pD3DTextureBullet->Release();
+		bullet->g_pD3DTextureBullet = NULL;
+	}	
 }
-
 //=============================================================================
 // 更新処理
 //=============================================================================
@@ -76,50 +59,46 @@ void UpdateBullet(void)
 	PLAYER *player = GetPlayer(0);
 	for (int i = 0; i < player->bullet_num + 1; i++) {
 		BULLET *bullet = GetBullet(i);
-		//bullet->g_nCountAnim = (bullet->g_nCountAnim + 1) % ANIM_PATTERN_NUM3;
-		//bullet->g_nPatternAnim = (bullet->g_nPatternAnim + 1) % ANIM_PATTERN_NUM3;   
-		if (bullet->g_posBullet.y < (-TEXTURE_SAMPLE00_SIZE_Y3)) {
+		if (bullet->g_posBullet.y < (-TEXTURE_SAMPLE00_SIZE_Y3) || bullet->g_posBullet.x < (-TEXTURE_SAMPLE00_SIZE_X3)) {
 			bullet->g_posBullet = D3DXVECTOR3(player->g_posPlayer.x + TEXTURE_SAMPLE00_SIZE_X / 2, player->g_posPlayer.y, 0.0f);
 			bullet->use = FALSE;
 		}
 		if (bullet->use) {
 			//OutputDebugStringA("B ");
-			bullet->g_posBullet.y -= 4;
+			bullet->g_posBullet.x -= 8;
 		}
 		else
 		{
 			bullet->g_posBullet = D3DXVECTOR3(player->g_posPlayer.x + TEXTURE_SAMPLE00_SIZE_X / 2, player->g_posPlayer.y, 0.0f);
 		}	
-		MakeVertexBullet();
 	}
+	MakeVertexBullet();
 }
-
 //=============================================================================
 // 描画処理
 //=============================================================================
 void DrawBullet(void)
 {
-	PLAYER *player = GetPlayer(0);
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-	// テクスチャの設定
-	pDevice->SetTexture(0, bullet->g_pD3DTextureBullet);
+	PLAYER *player = GetPlayer(0);
+	BULLET *bullet = GetBullet(0);
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
+	// テクスチャの設定
+	pDevice->SetTexture(0, bullet->g_pD3DTextureBullet);	
 	for (int i = 0; i < player->bullet_num; i++) {
 		BULLET *bullet = GetBullet(i);
-		// ポリゴンの描画
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, bullet->g_vertexWk, sizeof(VERTEX_2D));
-	}
-
+		if (bullet->use) {
+			// ポリゴンの描画
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, bullet->g_vertexWk, sizeof(VERTEX_2D));
+		}
+	}	
 }
-
 //=============================================================================
 // 頂点の作成
 //=============================================================================
 HRESULT MakeVertexBullet(void)
-{
-	//LPDIRECT3DDEVICE9 pDevice = GetDevice();
+{	
 	for (int i = 0; i < BULLET_MAX; i++) {		
 		BULLET *bullet = GetBullet(i);
 		// 頂点座標の設定
@@ -151,8 +130,7 @@ void SetVertexBullet(void)
 		bullet->g_vertexWk[1].vtx = D3DXVECTOR3(bullet->g_posBullet.x + TEXTURE_SAMPLE00_SIZE_X3, bullet->g_posBullet.y, bullet->g_posBullet.z);
 		bullet->g_vertexWk[2].vtx = D3DXVECTOR3(bullet->g_posBullet.x, bullet->g_posBullet.y + TEXTURE_SAMPLE00_SIZE_Y3, bullet->g_posBullet.z);
 		bullet->g_vertexWk[3].vtx = D3DXVECTOR3(bullet->g_posBullet.x + TEXTURE_SAMPLE00_SIZE_X3, bullet->g_posBullet.y + TEXTURE_SAMPLE00_SIZE_Y3, bullet->g_posBullet.z);
-	}
-	
+	}	
 }
 //=============================================================================
 // テクスチャ座標の設定
@@ -170,10 +148,10 @@ void SetTextureBullet(int cntPattern)
 	
 }
 /*******************************************************************************
-関数名:	BULLET *GetMapAdr( int pno )
-引数:	int pno : エネミー番号
+関数名:	BULLET *GetBulletAdr( int pno )
+引数:	int pno : Bullet番号
 戻り値:	BULLET *
-説明:	エネミーのアドレスを取得する
+説明:	Bulletのアドレスを取得する
 *******************************************************************************/
 BULLET *GetBullet(int pno)
 {
