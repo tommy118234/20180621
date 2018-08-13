@@ -1,18 +1,22 @@
-//=============================================================================
-//
-// ポリゴン表示Mainヘッダー [main.h]
-// Author : 
-//
-//=============================================================================
+/*******************************************************************************
+* タイトル:		DirectXゲーム～はじめての個人作品～
+* プログラム名:	Main処理 [main.h]
+* 作成者:		GP11B 16　徐　ワイ延
+* 作成開始日:	2018/07/24
+********************************************************************************/
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+
+//*****************************************************************************
+// マクロ定義
+//*****************************************************************************
 #define _CRT_SECURE_NO_WARNINGS			// scanf のwarning防止
 
 #include "windows.h"
 #include "d3dx9.h"
 #include <tchar.h>
-
+#include <stdio.h>
 
 #define DIRECTINPUT_VERSION 0x0800		// 警告対処
 #include "dinput.h"
@@ -26,8 +30,8 @@
 #pragma comment (lib, "winmm.lib")
 #endif
 
-#define SCREEN_WIDTH	(640)				// ウインドウの幅
-#define SCREEN_HEIGHT	(480)				// ウインドウの高さ
+#define SCREEN_WIDTH	(640)		// ウインドウの幅
+#define SCREEN_HEIGHT	(480)			// ウインドウの高さ
 #define SCREEN_CENTER_X	(SCREEN_WIDTH / 2)	// ウインドウの中心Ｘ座標
 #define SCREEN_CENTER_Y	(SCREEN_HEIGHT / 2)	// ウインドウの中心Ｙ座標
 
@@ -36,24 +40,21 @@
 
 // 頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
 #define	FVF_VERTEX_2D	(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
-// フィールド用
-#define FH_MAX		(20)		// 縦幅
-#define FW_MAX		(60)		// 横幅
 // 共通パラメータ用
-#define	NAME_MAX	(256)		// 名前BufのMAX
-#define PLAYER_MAX	(1)			// プレイヤーの数
-#define ENEMY_MAX	(1)			// 敵の数
-#define BULLET_MAX	(200)		// Bulletの数
-#define SCORE_MAX	(5)			// Scoreの数
-#define MAP_MAX     (1)			// Mapの数
-
+//#define	NAME_MAX	(256)		// 名前BufのMAX
+//#define PLAYER_MAX	(1)			// プレイヤーの数
+//#define ENEMY_MAX	(1)			// 敵の数
+//#define BULLET_MAX	(200)		// Bulletの数
+//#define SCORE_MAX	(5)			// Scoreの数
+//#define MAP_MAX     (1)			// Mapの数
+#define FPS_RATE			(30)						// FPS
+#define SAFE_RELEASE(ptr)	{if(ptr){(ptr)->Release();(ptr) = NULL;}}
 /*******************************************************************************
 * 構造体定義
 *******************************************************************************/
 typedef struct {
 	char name[32];
-	int HP;
+	int HP = 10;
 	int MP;
 	int ATK;
 	int DEF;
@@ -71,9 +72,21 @@ typedef struct
 	D3DXVECTOR2 tex;		// テクスチャ座標
 } VERTEX_2D;
 
+// 画面遷移定数
+enum E_STAGE
+{
+	STAGE_TITLE,
+	STAGE_TUTOR,
+	STAGE_GAME,
+	STAGE_GAME_END,
+	STAGE_RESULT,
+	STAGE_MAX
+};
 
+//*****************************************************************************
+// プロトタイプ宣言
+//*****************************************************************************
 LPDIRECT3DDEVICE9 GetDevice(void);		// デバイス取得関数
-void HitTest(void);
-void AddScore(void);
 
+void SetStage(int stage);
 #endif

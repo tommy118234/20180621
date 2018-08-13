@@ -1,64 +1,57 @@
-//=============================================================================
-//
-// ポリゴン処理 [enemy.h]
-// Author : 
-//
-//=============================================================================
+/*******************************************************************************
+* タイトル:		DirectXゲーム～はじめての個人作品～
+* プログラム名:	エネミー処理 [enemy.h]
+* 作成者:		GP11B 16　徐　ワイ延
+* 作成開始日:	2018/07/24
+********************************************************************************/
+
 #ifndef _ENEMY_H_
 #define _ENEMY_H_
 
 
 // マクロ定義
-//#define TEXTURE_GAME_SAMPLE00	_T("data/TEXTURE/runningman000.png")	// サンプル用画像
-//#define TEXTURE_SAMPLE00_SIZE_X	(200) // テクスチャサイズ
-//#define TEXTURE_SAMPLE00_SIZE_Y	(200) // 同上
-//
-//
-//#define TEXTURE_PATTERN_DIVIDE_X	(8)	// アニメパターンのテクスチャ内分割数（X)
-//#define TEXTURE_PATTERN_DIVIDE_Y	(1)	// アニメパターンのテクスチャ内分割数（Y)
-//#define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
-//#define TIME_ANIMATION				(100)	// アニメーションの切り替わるカウント
+#define	NUM_ENEMY					(2)			// ポリゴン数
 
+#define TEXTURE_GAME_ENEMY			_T("data/TEXTURE/runningman003.png")	// サンプル用画像
+#define TEXTURE_ENEMY_SIZE_X		(140)		// テクスチャサイズ
+#define TEXTURE_ENEMY_SIZE_Y		(200)		// 同上
 
-#define TEXTURE_GAME_SAMPLE002 _T("data/TEXTURE/runningman003.png")	// サンプル用画像
-#define TEXTURE_SAMPLE00_SIZE_X2	(140) // テクスチャサイズ
-#define TEXTURE_SAMPLE00_SIZE_Y2	(200) // 同上
+#define TEXTURE_PATTERN_DIVIDE_X_ENEMY	(5)		// アニメパターンのテクスチャ内分割数（X)
+#define TEXTURE_PATTERN_DIVIDE_Y_ENEMY	(2)		// アニメパターンのテクスチャ内分割数（Y)
+#define ANIM_PATTERN_NUM_ENEMY			(TEXTURE_PATTERN_DIVIDE_X_ENEMY*TEXTURE_PATTERN_DIVIDE_Y_ENEMY)	// アニメーションパターン数
+#define TIME_ANIMATION_ENEMY			(50)	// アニメーションの切り替わるカウント
 
-#define TEXTURE_PATTERN_DIVIDE_X2	(5)	// アニメパターンのテクスチャ内分割数（X)
-#define TEXTURE_PATTERN_DIVIDE_Y2	(2)	// アニメパターンのテクスチャ内分割数（Y)
-#define ANIM_PATTERN_NUM2			(TEXTURE_PATTERN_DIVIDE_X2*TEXTURE_PATTERN_DIVIDE_Y2)	// アニメーションパターン数
-#define TIME_ANIMATION2				(50)	// アニメーションの切り替わるカウント
-
+#define ENEMY_MAX						(4)		// 敵の最大数
 
 /*******************************************************************************
 * 構造体定義
 ********************************************************************************/
-typedef struct					// キャラクターの基本構造体
+typedef struct					// エネミー構造体
 {
 	CHARACTER	status;			// 共通パラメーター
 
-								//LPDIRECT3DTEXTURE9		g_pD3DTexturePlayer = NULL;		// テクスチャへのポリゴン
-								//
-								//VERTEX_2D				g_vertexWk[NUM_VERTEX];				// 頂点情報格納ワーク
-	D3DXVECTOR3				g_posEnemy;						// ポリゴンの移動量
-	D3DXVECTOR3				g_rotEnemy;						// ポリゴンの回転量
-	int						g_nCountAnim2;						// アニメーションカウント
-	int						g_nPatternAnim2;						// アニメーションパターンナンバー
+	bool					use = TRUE;						// true:使用  false:未使用
+	D3DXVECTOR3				pos;							// ポリゴンの移動量
+	D3DXVECTOR3				rot;							// ポリゴンの回転量	
+	int						PatternAnim;					// アニメーションパターンナンバー
+	int						CountAnim;						// アニメーションカウント
 
-	float					g_fRadiusEnemy;					// ポリゴンの半径
-	float					g_fBaseAngleEnemy;					// ポリゴンの角度
-	int						direction2 = -1;
-	bool					use = TRUE;
+	LPDIRECT3DTEXTURE9		Texture;						// テクスチャ情報
+	VERTEX_2D				vertexWk[NUM_VERTEX];			// 頂点情報格納ワーク
+
+	float					Radius;					// ポリゴンの半径
+	float					BaseAngle = 0.2;		// ポリゴンの角度
+
 } ENEMY;
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitEnemy(void);
+HRESULT InitEnemy(int type);
 void UninitEnemy(void);
 void UpdateEnemy(void);
 void DrawEnemy(void);
-ENEMY *GetEnemy(int pno);	// プレイヤーの(アドレス)を取得
+ENEMY *GetEnemy(int pno);
 
 
 #endif

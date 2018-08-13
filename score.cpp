@@ -1,41 +1,56 @@
-//=============================================================================
-//
-// ポリゴン処理 [score.cpp]
-//
-//=============================================================================
+/*******************************************************************************
+* タイトル:		DirectXゲーム～はじめての個人作品～
+* プログラム名:	スコア処理 [score.cpp]
+* 作成者:		GP11B 16　徐　ワイ延
+* 作成開始日:	2018/07/24
+********************************************************************************/
 #include "main.h"
 #include "score.h"
-#include "player.h"
+#include <stdio.h>
+
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
+
+
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT MakeVertexScore(void);
-void SetVertexScore(void);
-void SetTextureScore(int cntPattern);
+void SetTextureScore(void);
+
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-SCORE	score[SCORE_MAX];
+LPDIRECT3DTEXTURE9		g_pD3DTextureScore = NULL;		// テクスチャへのポリゴン
+VERTEX_2D				g_vertexWkScore[SCORE_DIGIT][NUM_VERTEX];	// 頂点情報格納ワーク
+
+D3DXVECTOR3				g_posScore;						// ポリゴンの移動量
+
+int						g_nScore;						// スコア
+
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitScore(void)
-{	
+HRESULT InitScore(int type)
+{
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	PLAYER *player = GetPlayer(0);
-	for (int i = 0; i < SCORE_MAX; i++) {		
-		SCORE *score = GetScore(i);
-		score->g_posScore = D3DXVECTOR3(SCREEN_WIDTH - (i+1) * TEXTURE_SAMPLE00_SIZE_X4, 0.0f, 0.0f);
-		// 頂点情報の作成
-		MakeVertexScore();
+	
+	// テクスチャーの初期化を行う？
+	if (type == 0)
+	{
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,		// デバイスのポインタ
-		TEXTURE_GAME_SAMPLE003,					// ファイルの名前
-		&score->g_pD3DTextureScore);			// 読み込むメモリのポインタ
+			TEXTURE_GAME_SCORE00,				// ファイルの名前
+			&g_pD3DTextureScore);				// 読み込むメモリのポインタ
 	}
+
+	g_posScore = D3DXVECTOR3((float)SCORE_POS_X, (float)SCORE_POS_Y, 0.0f);
+	g_nScore = 0;
+
+	// 頂点情報の作成
+	MakeVertexScore();
+
 	return S_OK;
 }
 
@@ -44,11 +59,12 @@ HRESULT InitScore(void)
 //=============================================================================
 void UninitScore(void)
 {
-	if (score->g_pD3DTextureScore != NULL)	//
+	if( g_pD3DTextureScore != NULL )
 	{	// テクスチャの開放
-		score->g_pD3DTextureScore->Release();
-		score->g_pD3DTextureScore = NULL;
+		g_pD3DTextureScore->Release();
+		g_pD3DTextureScore = NULL;
 	}
+
 }
 
 //=============================================================================
@@ -56,105 +72,116 @@ void UninitScore(void)
 //=============================================================================
 void UpdateScore(void)
 {
-	PLAYER *player = GetPlayer(0);
-	SCORE * score = GetScore(0);
-	for (int i = 0; i < SCORE_MAX; i++) {
-		score = GetScore(i);
-		int k = player->score;
-		switch (i) {		
-		case 1:
-			k = player->score/10;
-			break;
-		case 2:
-			k = player->score / 100;
-			break;
-		case 3:
-			k = player->score / 1000;
-			break;
-		case 4:
-			k = player->score / 10000;
-			break;			
-		}
-		score->g_nPatternAnim3 = k % ANIM_PATTERN_NUM4;
-	}	
-	MakeVertexScore();
+	// 毎フレーム実行される処理を記述する
+
+
+	SetTextureScore();
+
 }
+
 //=============================================================================
 // 描画処理
 //=============================================================================
 void DrawScore(void)
-{	
+{
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	BULLET *bullet = GetBullet(0);
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
-	for (int i = 0; i < SCORE_MAX; i++) {
-		SCORE *score = GetScore(i);	
-		// テクスチャの設定
-		pDevice->SetTexture(0, score->g_pD3DTextureScore);
+	int i;
+
+	// テクスチャの設定
+	pDevice->SetTexture( 0, g_pD3DTextureScore );
+
+	// スコア
+	for( i = 0; i < SCORE_DIGIT; i++ )
+	{
+		// 頂点フォーマットの設定
+		pDevice->SetFVF(FVF_VERTEX_2D);
+
 		// ポリゴンの描画
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, score->g_vertexWk3, sizeof(VERTEX_2D));
+		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWkScore[i], sizeof(VERTEX_2D));
 	}
+
 }
+
 //=============================================================================
 // 頂点の作成
 //=============================================================================
 HRESULT MakeVertexScore(void)
 {
-	for (int i = 0; i < SCORE_MAX; i++) {
-		SCORE *score = GetScore(i);
+	int i;
+	float habaX = 16.0f;	// 数字の横幅
+	
+	// 桁数分処理する
+	for( i = 0; i < SCORE_DIGIT; i++ )
+	{
 		// 頂点座標の設定
-		SetVertexScore();
+		g_vertexWkScore[i][0].vtx.x = -habaX * i + g_posScore.x;
+		g_vertexWkScore[i][0].vtx.y = g_posScore.y;
+		g_vertexWkScore[i][0].vtx.z = 0.0f;
+		g_vertexWkScore[i][1].vtx.x = -habaX * i + g_posScore.x + TEXTURE_SCORE00_SIZE_X;
+		g_vertexWkScore[i][1].vtx.y = g_posScore.y;
+		g_vertexWkScore[i][1].vtx.z = 0.0f;
+		g_vertexWkScore[i][2].vtx.x = -habaX * i + g_posScore.x;
+		g_vertexWkScore[i][2].vtx.y = g_posScore.y + TEXTURE_SCORE00_SIZE_Y;
+		g_vertexWkScore[i][2].vtx.z = 0.0f;
+		g_vertexWkScore[i][3].vtx.x = -habaX * i + g_posScore.x + TEXTURE_SCORE00_SIZE_X;
+		g_vertexWkScore[i][3].vtx.y = g_posScore.y + TEXTURE_SCORE00_SIZE_Y;
+		g_vertexWkScore[i][3].vtx.z = 0.0f;
+
 		// rhwの設定
-		score->g_vertexWk3[0].rhw =
-		score->g_vertexWk3[1].rhw =
-		score->g_vertexWk3[2].rhw =
-		score->g_vertexWk3[3].rhw = 1.0f;
+		g_vertexWkScore[i][0].rhw =
+		g_vertexWkScore[i][1].rhw =
+		g_vertexWkScore[i][2].rhw =
+		g_vertexWkScore[i][3].rhw = 1.0f;
+
 		// 反射光の設定
-		score->g_vertexWk3[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		score->g_vertexWk3[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		score->g_vertexWk3[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-		score->g_vertexWk3[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		g_vertexWkScore[i][0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		g_vertexWkScore[i][1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		g_vertexWkScore[i][2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+		g_vertexWkScore[i][3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+
 		// テクスチャ座標の設定
-		SetTextureScore(i);
+		g_vertexWkScore[i][0].tex = D3DXVECTOR2( 0.0f, 0.0f );
+		g_vertexWkScore[i][1].tex = D3DXVECTOR2( 1.0f, 0.0f );
+		g_vertexWkScore[i][2].tex = D3DXVECTOR2( 0.0f, 1.0f );
+		g_vertexWkScore[i][3].tex = D3DXVECTOR2( 1.0f, 1.0f );
 	}
+
 	return S_OK;
 }
-
 //=============================================================================
 // 頂点座標の設定
 //=============================================================================
-void SetVertexScore(void)
+void SetTextureScore(void)
 {
-	for (int i = 0; i < SCORE_MAX; i++) {
-		SCORE *score = GetScore(i);
-		// 頂点座標の設定
-		score->g_vertexWk3[0].vtx = D3DXVECTOR3(score->g_posScore.x, score->g_posScore.y, score->g_posScore.z);
-		score->g_vertexWk3[1].vtx = D3DXVECTOR3(score->g_posScore.x + TEXTURE_SAMPLE00_SIZE_X4, score->g_posScore.y, score->g_posScore.z);
-		score->g_vertexWk3[2].vtx = D3DXVECTOR3(score->g_posScore.x, score->g_posScore.y + TEXTURE_SAMPLE00_SIZE_Y4, score->g_posScore.z);
-		score->g_vertexWk3[3].vtx = D3DXVECTOR3(score->g_posScore.x + TEXTURE_SAMPLE00_SIZE_X4, score->g_posScore.y + TEXTURE_SAMPLE00_SIZE_Y4, score->g_posScore.z);
+	int i;
+	int number = g_nScore;
+	
+	for( i = 0; i < SCORE_DIGIT; i++ )
+	{
+		// テクスチャ座標の設定
+		float x = (float)(number % 10);
+		g_vertexWkScore[i][0].tex = D3DXVECTOR2( 0.1f * x, 0.0f );
+		g_vertexWkScore[i][1].tex = D3DXVECTOR2( 0.1f * ( x + 1 ),	 0.0f );
+		g_vertexWkScore[i][2].tex = D3DXVECTOR2( 0.1f * x, 1.0f );
+		g_vertexWkScore[i][3].tex = D3DXVECTOR2( 0.1f * ( x + 1 ),	 1.0f );
+		number /= 10;
 	}
 
 }
 //=============================================================================
-// テクスチャ座標の設定
+// HPデータをセットする
+// 引数:add :追加する点数。マイナスも可能、初期化などに。
 //=============================================================================
-void SetTextureScore(int cntPattern)
-{	
-	SCORE *score = GetScore(cntPattern);
-	// テクスチャ座標の設定
-	score->g_vertexWk3[0].tex = D3DXVECTOR2((float)(score->g_nPatternAnim3 % TEXTURE_PATTERN_DIVIDE_X4) / TEXTURE_PATTERN_DIVIDE_X4, (float)(score->g_nPatternAnim3 / TEXTURE_PATTERN_DIVIDE_X4) / TEXTURE_PATTERN_DIVIDE_Y4);
-	score->g_vertexWk3[1].tex = D3DXVECTOR2((float)((score->g_nPatternAnim3 % TEXTURE_PATTERN_DIVIDE_X4) + 1) /TEXTURE_PATTERN_DIVIDE_X4, (float)(score->g_nPatternAnim3 / TEXTURE_PATTERN_DIVIDE_X4) / TEXTURE_PATTERN_DIVIDE_Y4);
-	score->g_vertexWk3[2].tex = D3DXVECTOR2((float)(score->g_nPatternAnim3 % TEXTURE_PATTERN_DIVIDE_X4) / TEXTURE_PATTERN_DIVIDE_X4, (float)((score->g_nPatternAnim3 / TEXTURE_PATTERN_DIVIDE_X4) + 1) / TEXTURE_PATTERN_DIVIDE_Y4);
-	score->g_vertexWk3[3].tex = D3DXVECTOR2((float)((score->g_nPatternAnim3 % TEXTURE_PATTERN_DIVIDE_X4) + 1) / TEXTURE_PATTERN_DIVIDE_X4, (float)((score->g_nPatternAnim3 / TEXTURE_PATTERN_DIVIDE_X4) + 1) /TEXTURE_PATTERN_DIVIDE_Y4);
-}
-/*******************************************************************************
-関数名:	SCORE *GetMapAdr( int pno )
-引数:	int pno : エネミー番号
-戻り値:	SCORE *
-説明:	エネミーのアドレスを取得する
-*******************************************************************************/
-SCORE *GetScore(int pno)
+void AddScore( int add )
 {
-	return &score[pno];
+	g_nScore += add;
+	if( g_nScore > SCORE_MAX )
+	{
+		g_nScore = SCORE_MAX;
+	}
+	else if( g_nScore < 0 )
+	{
+		g_nScore = 0;
+	}
+
 }
