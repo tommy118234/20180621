@@ -8,7 +8,8 @@
 #define _BG_H_
 
 // マクロ定義
-#define TEXTURE_GAME_BG00		_T("data/TEXTURE/earth.png")	// サンプル用画像
+//#define TEXTURE_GAME_BG00		_T("data/TEXTURE/earth.png")	// サンプル用画像
+#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")	// サンプル用画像
 #define BG00_SIZE_X			(800)	// テクスチャサイズ
 #define BG00_SIZE_Y			(600)	// 同上
 #define BG00_POS_X			(0)		// ポリゴンの初期位置X(左上)

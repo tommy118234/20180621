@@ -371,6 +371,7 @@ void Update(void)
 		UpdateTitle();
 		break;
 	case STAGE_TUTOR:
+		
 		if (GetKeyboardTrigger(DIK_RETURN))
 		{// Enter押したら、ステージを切り替える
 			SetStage(STAGE_GAME);
@@ -384,6 +385,10 @@ void Update(void)
 		{
 			SetStage(STAGE_GAME);
 		}
+		// プレイヤーの更新処理
+		UpdatePlayer();
+		// エネミーの更新処理
+		UpdateEnemy();
 		break;
 	case STAGE_GAME:
 		// プレイヤーの更新処理
@@ -436,8 +441,11 @@ void Draw(void)
 		case STAGE_TITLE:
 			DrawTitle();
 			break;
-		case STAGE_TUTOR:	
+		case STAGE_TUTOR:				
+			// BGの描画処理
 			DrawBG();
+			// プレイヤーの描画処理
+			DrawPlayer();
 			break;
 		case STAGE_GAME:
 		case STAGE_GAME_END:
@@ -532,8 +540,29 @@ void DrawFPS(void)
 //=============================================================================
 void SetStage(int stage)
 {
-	//if( state < 0 || state >= STATE_MAX ) return;
+	//if( state < 0 || state >= STATE_MAX ) return;		
 	g_nStage = stage;
+	
+	StopSound(g_pBGM);
+	switch (g_nStage)
+	{
+	case STAGE_TITLE:
+		g_pBGM = LoadSound(BGM_00);
+		break;
+	case STAGE_TUTOR:
+		g_pBGM = LoadSound(BGM_01);
+		break;
+	case STAGE_GAME:
+		g_pBGM = LoadSound(BGM_02);
+		break;
+	case STAGE_GAME_END:
+		g_pBGM = LoadSound(BGM_03);
+		break;
+	case STAGE_RESULT:
+		g_pBGM = LoadSound(BGM_04);
+		break;
+	}
+	PlaySound(g_pBGM, E_DS8_FLAG_LOOP);
 }
 //=============================================================================
 // 当たり判定処理

@@ -65,8 +65,7 @@ void UninitTitle(void)
 void UpdateTitle(void)
 {
 	if (GetKeyboardTrigger(DIK_RETURN))
-	{// Enter押したら、ステージを切り替える
-
+	{// Enter押したら、ステージを切り替える		
 		SetStage(STAGE_TUTOR);
 		//SetStage(STAGE_GAME);
 	}

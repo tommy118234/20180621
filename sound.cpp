@@ -14,7 +14,13 @@
 
 // サウンドファイルのパス（hの通しナンバーと合わせること）
 const TCHAR* c_soundFilename[] = {
-	_T("data/BGM/sample000.wav"),
+	//_T("data/BGM/sample000.wav"),
+	_T("data/BGM/memory1.wav"),
+	_T("data/BGM/crystal1.wav"),
+	_T("data/BGM/cyber_battle.wav"),
+	_T("data/BGM/forest1.wav"),
+	_T("data/BGM/crystal3.wav"),
+	_T("data/BGM/moonlight.wav"),
 	_T("data/SE/bomb000.wav")
 };
 

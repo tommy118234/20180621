@@ -14,6 +14,11 @@
 enum
 {	// サウンド通しナンバー
 	BGM_00,
+	BGM_01,
+	BGM_02,
+	BGM_03,
+	BGM_04,
+	BGM_05,
 	SE_00,
 	SOUND_MAX
 };
@@ -27,5 +32,6 @@ HRESULT					InitSound( HWND hWnd );										// 初期化
 void					UninitSound();												// 後片付け
 LPDIRECTSOUNDBUFFER8	LoadSound( int no );										// サウンドのロード
 void					PlaySound( LPDIRECTSOUNDBUFFER8 pBuffer, int flag = 0 );	// 音ごとに再生
+void					StopSound(LPDIRECTSOUNDBUFFER8 pBuffer);	// 音ごとに再生
 bool					IsPlaying( LPDIRECTSOUNDBUFFER8 pBuffer );					// 再生中かどうか
 #endif

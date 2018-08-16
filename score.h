@@ -7,7 +7,7 @@
 #ifndef _SCORE_H_
 #define _SCORE_H_
 // マクロ定義
-#define TEXTURE_GAME_SCORE00	_T("data/TEXTURE/number16x32.png")	// サンプル用画像
+#define TEXTURE_GAME_SCORE00	_T("data/TEXTURE/number2.png")//"data/TEXTURE/number16x32.png")	// サンプル用画像
 #define TEXTURE_SCORE00_SIZE_X	(16)	// テクスチャサイズ
 #define TEXTURE_SCORE00_SIZE_Y	(32)	// 同上
 #define SCORE_POS_X			(500)		// ポリゴンの初期位置X

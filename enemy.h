@@ -13,8 +13,8 @@
 #define	NUM_ENEMY					(2)			// ポリゴン数
 
 #define TEXTURE_GAME_ENEMY			_T("data/TEXTURE/runningman003.png")	// サンプル用画像
-#define TEXTURE_ENEMY_SIZE_X		(140)		// テクスチャサイズ
-#define TEXTURE_ENEMY_SIZE_Y		(200)		// 同上
+#define TEXTURE_ENEMY_SIZE_X		(140/2)		// テクスチャサイズ
+#define TEXTURE_ENEMY_SIZE_Y		(200/2)		// 同上
 
 #define TEXTURE_PATTERN_DIVIDE_X_ENEMY	(5)		// アニメパターンのテクスチャ内分割数（X)
 #define TEXTURE_PATTERN_DIVIDE_Y_ENEMY	(2)		// アニメパターンのテクスチャ内分割数（Y)

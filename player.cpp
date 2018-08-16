@@ -24,6 +24,11 @@ LPDIRECT3DTEXTURE9		g_pD3DTexturePlayer = NULL;		// テクスチャへのポリゴン
   
 
 int bullet_cooldown = 0;
+int moving_cooldown = 0;
+int gravity = 5;
+int acceleration = 0;
+bool jump_cooldown = FALSE;
+
 
 PLAYER					player[PLAYER_MAX];				// プレイヤー構造体
 //=============================================================================
@@ -43,7 +48,8 @@ HRESULT InitPlayer(int type)
 			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
 	}
 
-	player->pos = D3DXVECTOR3(SCREEN_CENTER_X + TEXTURE_PLAYER_SIZE_X / 2, SCREEN_CENTER_Y + TEXTURE_PLAYER_SIZE_Y / 2, 0.0f);
+	//player->pos = D3DXVECTOR3(SCREEN_CENTER_X + TEXTURE_PLAYER_SIZE_X / 2, SCREEN_CENTER_Y + TEXTURE_PLAYER_SIZE_Y / 2, 0.0f);
+	player->pos = D3DXVECTOR3( TEXTURE_PLAYER_SIZE_X / 2, SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y, 0.0f);
 	player->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	player->CountAnim = 0;
 	player->PatternAnim = 0;
@@ -75,9 +81,37 @@ void UpdatePlayer(void)
 {			
 	//player->bullet_num = 0;
 	
+
+
+	//万有引力
+	if (!jump_cooldown) {
+		player->pos.y += gravity + acceleration;
+		if (acceleration <= 0) {
+			acceleration -= 1;
+			if (acceleration < 0)
+				acceleration = 0;
+		}
+	}
+
+	//Jump
+	if (jump_cooldown) {
+		if (acceleration > 0) {
+			player->pos.y -= acceleration;
+			acceleration -= 2;
+		}
+		else {
+			jump_cooldown = FALSE;
+			acceleration = 20 - acceleration/2;
+		}
+	}
+
+
 	// アニメーション
 	//player->CountAnim = (player->CountAnim +1) % TEXTURE_PATTERN_DIVIDE_X;
-	player->PatternAnim = (player->PatternAnim + 1) % ANIM_PATTERN_NUM;
+	if (moving_cooldown > 0) {
+		player->PatternAnim = (player->PatternAnim + 1) % ANIM_PATTERN_NUM;
+		moving_cooldown--;
+	}
 	if (player->pos.x < 0) 
 	{
 		player->pos.x = SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X / 2;
@@ -92,20 +126,27 @@ void UpdatePlayer(void)
 	}
 	if (player->pos.y > SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y)
 	{
-		player->pos.y = 0;
+		player->pos.y = SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y;
+		acceleration = 0;
+		jump_cooldown = FALSE;
 	}
-
+	
 	// 入力対応
 	if (GetKeyboardPress(DIK_DOWN)) {
+		
 		player->pos.y += 5;
 	}
-	if (GetKeyboardPress(DIK_UP)) {
-		player->pos.y -= 5;
+	if (GetKeyboardPress(DIK_UP) && acceleration == 0) {
+		// jump
+		acceleration = 20;
+		jump_cooldown = TRUE;		
 	}
 	if (GetKeyboardPress(DIK_LEFT)) {
+		moving_cooldown ++;
 		player->pos.x -= 5;
 	}
-	if (GetKeyboardPress(DIK_RIGHT)) {		
+	if (GetKeyboardPress(DIK_RIGHT)) {	
+		moving_cooldown ++;
 		player->pos.x += 5;
 	}
 	if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0)) {	
@@ -154,7 +195,7 @@ void UpdatePlayer(void)
 	}
   	MakeVertexPlayer();
 	if(bullet_cooldown > 0)
-	bullet_cooldown--;
+	bullet_cooldown--;	
 }
 
 //=============================================================================
