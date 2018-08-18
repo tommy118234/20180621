@@ -19,8 +19,7 @@ enum
 	BGM_03,
 	BGM_04,
 	BGM_05,
-	SE_00,
-	SOUND_MAX
+	SE_00
 };
 enum
 {	// Ä¶—pƒtƒ‰ƒO

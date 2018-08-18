@@ -49,7 +49,13 @@ HRESULT InitBG(int type)
 	// 頂点情報の作成
 	MakeVertexBG();
 
-	g_posBG.x = -GetPlayer(0)->pos.x / 4.0f;
+	//g_posBG.x = -GetPlayer(0)->pos.x / 4.0f;
+	//g_posBG.y = -GetPlayer(0)->pos.y / 4.0f;
+	//
+	//if (BG00_POS_X - g_posBG.x < 0)
+	//	g_posBG.x = 0;
+	//if (BG00_POS_Y - g_posBG.y < 0)
+	//	g_posBG.y = 0;
 
 	SetVertexBG();
 
@@ -78,6 +84,12 @@ void UpdateBG(void)
 
 	// スクロール処理
 	g_posBG.x = -GetPlayer(0)->pos.x / 4.0f;
+	g_posBG.y = -GetPlayer(0)->pos.y / 4.0f;
+
+	if (BG00_POS_X - g_posBG.x < 0)
+		g_posBG.x = 0;
+	if (BG00_POS_Y - g_posBG.y < 0)
+		g_posBG.y = 0;
 
 	SetVertexBG();
 }
@@ -141,4 +153,40 @@ void SetVertexBG(void)
 	g_vertexWkBG[1].vtx = D3DXVECTOR3(BG00_POS_X + BG00_SIZE_X, BG00_POS_Y, 0.0f) + g_posBG;
 	g_vertexWkBG[2].vtx = D3DXVECTOR3(BG00_POS_X, BG00_POS_Y + BG00_SIZE_Y, 0.0f) + g_posBG;
 	g_vertexWkBG[3].vtx = D3DXVECTOR3(BG00_POS_X + BG00_SIZE_X, BG00_POS_Y + BG00_SIZE_Y, 0.0f) + g_posBG;
+}
+
+//=============================================================================
+// 頂点座標の設定
+//=============================================================================
+void SwitchBG(int type)
+{
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	switch (type)
+	{
+	case 1:
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_GAME_BG01,								// ファイルの名前
+			&g_pD3DTextureBG);								// 読み込むメモリー
+		break;
+
+	case 2:
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_GAME_BG02,								// ファイルの名前
+			&g_pD3DTextureBG);								// 読み込むメモリー
+		break;
+
+	case 3:
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_GAME_BG03,								// ファイルの名前
+			&g_pD3DTextureBG);								// 読み込むメモリー				
+		break;
+
+	case 4:
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_GAME_BG04,								// ファイルの名前
+			&g_pD3DTextureBG);								// 読み込むメモリー
+		break;
+
+	}
+	
 }

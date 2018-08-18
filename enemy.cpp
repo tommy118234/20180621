@@ -50,7 +50,9 @@ HRESULT InitEnemy(int type)
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
 		enemy->use = true;
-		enemy->pos = D3DXVECTOR3(TEXTURE_ENEMY_SIZE_X, SCREEN_CENTER_Y - TEXTURE_ENEMY_SIZE_Y / 2, 0.0f);
+		//enemy->pos = D3DXVECTOR3(TEXTURE_ENEMY_SIZE_X, SCREEN_CENTER_Y - TEXTURE_ENEMY_SIZE_Y / 2, 0.0f);
+		enemy->pos = D3DXVECTOR3(SCREEN_CENTER_X,  TEXTURE_ENEMY_SIZE_Y, 0.0f);
+		
 		enemy->rot = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 		enemy->CountAnim = 0;
 		enemy->PatternAnim = 0;

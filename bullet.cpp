@@ -99,7 +99,7 @@ void UpdateBullet(void)
 		
 		if (bullet->use) {
 			// バレットの移動処理
-			bullet->pos.x -= BULLET_SPEED;
+			bullet->pos.y -= bullet->direction * BULLET_SPEED;
 			// 画面外まで進んだ？
 			if (bullet->pos.y < (-TEXTURE_BULLET_SIZE_Y) || bullet->pos.x < (-TEXTURE_BULLET_SIZE_X)) {
 				bullet->use = FALSE;

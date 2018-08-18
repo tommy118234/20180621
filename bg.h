@@ -9,11 +9,18 @@
 
 // マクロ定義
 //#define TEXTURE_GAME_BG00		_T("data/TEXTURE/earth.png")	// サンプル用画像
-#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")	// サンプル用画像
-#define BG00_SIZE_X			(800)	// テクスチャサイズ
-#define BG00_SIZE_Y			(600)	// 同上
+#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")		// 背景画像
+#define TEXTURE_GAME_BG01		_T("data/BG/moon_ice.png")	// 背景画像
+#define TEXTURE_GAME_BG02		_T("data/BG/battle_ice.png")	// 背景画像
+#define TEXTURE_GAME_BG03		_T("data/BG/ice_castle.png")	// 背景画像
+#define TEXTURE_GAME_BG04		_T("data/BG/moon_ice.png")	// 背景画像
+#define BG00_SIZE_X			(800)//800)	// テクスチャサイズ
+#define BG00_SIZE_Y			(600)//600)	// 同上
 #define BG00_POS_X			(0)		// ポリゴンの初期位置X(左上)
 #define BG00_POS_Y			(0)		// 同上
+
+#define BG02_SIZE_X			(800)//800)	// テクスチャサイズ
+#define BG02_SIZE_Y			(1920)//600)	// 同上
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -22,5 +29,6 @@ HRESULT InitBG(int type);
 void UninitBG(void);
 void UpdateBG(void);
 void DrawBG(void);
+void SwitchBG(int type);
 
 #endif

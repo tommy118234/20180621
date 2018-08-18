@@ -41,6 +41,7 @@ typedef struct					// バレットの構造体
 	
 	float					Radius;					// ポリゴンの半径
 	float					BaseAngle = 0.2;		// ポリゴンの角度
+	int						direction = 1;
 
 } BULLET;
 

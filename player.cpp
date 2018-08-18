@@ -7,6 +7,7 @@
 #include "main.h"
 #include "player.h"
 #include "input.h"
+#include "sound.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -14,23 +15,20 @@
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT MakeVertexPlayer(void);
-void SetVertexPlayer(void);
+void SetVertexPlayer(int);
 void SetTexturePlayer( int cntPattern );	//
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTexturePlayer = NULL;		// テクスチャへのポリゴン
-  
+PLAYER					player[PLAYER_MAX];				// プレイヤー構造体
+LPDIRECTSOUNDBUFFER8	g_pSE2;							// SE用バッファ
 
 int bullet_cooldown = 0;
 int moving_cooldown = 0;
-int gravity = 5;
 int acceleration = 0;
 bool jump_cooldown = FALSE;
-
-
-PLAYER					player[PLAYER_MAX];				// プレイヤー構造体
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -46,6 +44,7 @@ HRESULT InitPlayer(int type)
 		D3DXCreateTextureFromFile(pDevice,		// デバイスのポインタ
 			TEXTURE_GAME_PLAYER,				// ファイルの名前
 			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
+		g_pSE2 = LoadSound(SE_00);
 	}
 
 	//player->pos = D3DXVECTOR3(SCREEN_CENTER_X + TEXTURE_PLAYER_SIZE_X / 2, SCREEN_CENTER_Y + TEXTURE_PLAYER_SIZE_Y / 2, 0.0f);
@@ -80,17 +79,23 @@ void UninitPlayer(void)
 void UpdatePlayer(void)
 {			
 	//player->bullet_num = 0;
-	
+	if (player->view_mode == 0) {	
+		LPDIRECT3DDEVICE9 pDevice = GetDevice();
+		D3DXCreateTextureFromFile(pDevice,		// デバイスのポインタ
+			TEXTURE_GAME_PLAYER2,				// ファイルの名前
+			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
+	}
 
 
 	//万有引力
-	if (!jump_cooldown) {
-		player->pos.y += gravity + acceleration;
-		if (acceleration <= 0) {
+	if (!jump_cooldown && player->gravity > 0) {
+		player->pos.y += player->gravity + acceleration;
+		if (acceleration >= 0) {
 			acceleration -= 1;
-			if (acceleration < 0)
-				acceleration = 0;
+			
 		}
+		else if (acceleration < 0)
+			acceleration = 0;
 	}
 
 	//Jump
@@ -101,24 +106,26 @@ void UpdatePlayer(void)
 		}
 		else {
 			jump_cooldown = FALSE;
-			acceleration = 20 - acceleration/2;
+			acceleration = 20 + acceleration/2;
 		}
-	}
-
+	}	
 
 	// アニメーション
 	//player->CountAnim = (player->CountAnim +1) % TEXTURE_PATTERN_DIVIDE_X;
 	if (moving_cooldown > 0) {
 		player->PatternAnim = (player->PatternAnim + 1) % ANIM_PATTERN_NUM;
+		if (player->PatternAnim == 1 || player->PatternAnim == 6)
 		moving_cooldown--;
 	}
+
+	// 画面外判定
 	if (player->pos.x < 0) 
 	{
-		player->pos.x = SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X / 2;
+		player->pos.x =  0;
 	}
-	if (player->pos.x > SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X / 2)
+	if (player->pos.x > SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X)
 	{
-		player->pos.x = 0;
+		player->pos.x = SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X;
 	}
 	if (player->pos.y < 0)
 	{
@@ -132,22 +139,32 @@ void UpdatePlayer(void)
 	}
 	
 	// 入力対応
-	if (GetKeyboardPress(DIK_DOWN)) {
+	if (GetKeyboardPress(DIK_DOWN) && player->gravity == 0) {
 		
 		player->pos.y += 5;
 	}
-	if (GetKeyboardPress(DIK_UP) && acceleration == 0) {
-		// jump
-		acceleration = 20;
-		jump_cooldown = TRUE;		
+	if (GetKeyboardPress(DIK_UP)) {
+		if (player->gravity != 0) {
+			if (acceleration == 0 && !jump_cooldown) {
+				// jump
+				acceleration = 20;
+				jump_cooldown = TRUE;
+			}
+		}
+		else {
+			player->pos.y -= 5;
+		}
+
 	}
 	if (GetKeyboardPress(DIK_LEFT)) {
-		moving_cooldown ++;
-		player->pos.x -= 5;
+		moving_cooldown   =  1;
+		player->direction = -1;
+		player->pos.x	 -= 5;
 	}
 	if (GetKeyboardPress(DIK_RIGHT)) {	
-		moving_cooldown ++;
-		player->pos.x += 5;
+		moving_cooldown   = 1;
+		player->direction = 1;
+		player->pos.x	 += 5;
 	}
 	if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0)) {	
 		//BULLET *bullet = GetBullet(player->bullet_num % BULLET_MAX);
@@ -155,6 +172,9 @@ void UpdatePlayer(void)
 			//OutputDebugStringA("\nSPACE\n");			
 		BULLET *bullet = GetBullet(player->bullet_num );		
 		bullet->use = TRUE;
+		
+		PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+		//bullet->direction = player->direction;
 		player->bullet_num = (++player->bullet_num % (BULLET_MAX));
 		bullet_cooldown += 5;
 		//switch (player->bullet_num) {
@@ -220,7 +240,7 @@ HRESULT MakeVertexPlayer(void)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 	// 頂点座標の設定
-	SetVertexPlayer();
+	SetVertexPlayer(player->direction);
 	// rhwの設定
 	player->vertexWk[0].rhw =
 	player->vertexWk[1].rhw =
@@ -239,13 +259,24 @@ HRESULT MakeVertexPlayer(void)
 //=============================================================================
 // 頂点座標の設定
 //=============================================================================
-void SetVertexPlayer(void)
+void SetVertexPlayer(int i)
 {
 	// 頂点座標の設定
-	player->vertexWk[0].vtx = D3DXVECTOR3(player->pos.x, player->pos.y, player->pos.z);
-	player->vertexWk[1].vtx = D3DXVECTOR3(player->pos.x + TEXTURE_PLAYER_SIZE_X, player->pos.y, player->pos.z);
-	player->vertexWk[2].vtx = D3DXVECTOR3(player->pos.x, player->pos.y + TEXTURE_PLAYER_SIZE_Y, player->pos.z);
-	player->vertexWk[3].vtx = D3DXVECTOR3(player->pos.x + TEXTURE_PLAYER_SIZE_X, player->pos.y + TEXTURE_PLAYER_SIZE_Y, player->pos.z);
+	switch (i)
+	{
+	case -1:
+		player->vertexWk[0].vtx = D3DXVECTOR3(player->pos.x, player->pos.y, player->pos.z);
+		player->vertexWk[1].vtx = D3DXVECTOR3(player->pos.x + TEXTURE_PLAYER_SIZE_X, player->pos.y, player->pos.z);
+		player->vertexWk[2].vtx = D3DXVECTOR3(player->pos.x, player->pos.y + TEXTURE_PLAYER_SIZE_Y, player->pos.z);
+		player->vertexWk[3].vtx = D3DXVECTOR3(player->pos.x + TEXTURE_PLAYER_SIZE_X, player->pos.y + TEXTURE_PLAYER_SIZE_Y, player->pos.z);		
+		break;
+	case 1:		
+		player->vertexWk[1].vtx = D3DXVECTOR3(player->pos.x, player->pos.y, player->pos.z);
+		player->vertexWk[0].vtx = D3DXVECTOR3(player->pos.x + TEXTURE_PLAYER_SIZE_X, player->pos.y, player->pos.z);
+		player->vertexWk[3].vtx = D3DXVECTOR3(player->pos.x, player->pos.y + TEXTURE_PLAYER_SIZE_Y, player->pos.z);
+		player->vertexWk[2].vtx = D3DXVECTOR3(player->pos.x + TEXTURE_PLAYER_SIZE_X, player->pos.y + TEXTURE_PLAYER_SIZE_Y, player->pos.z);
+		break;
+	}	
 }
 //=============================================================================
 // テクスチャ座標の設定
@@ -267,4 +298,20 @@ void SetTexturePlayer( int cntPattern )
 PLAYER *GetPlayer(int pno)
 {
 	return &player[pno];
+}
+
+
+void ChangePlayer(void)
+{
+#undef TEXTURE_GAME_PLAYER	_T	
+#undef TEXTURE_PLAYER_SIZE_X	
+#undef TEXTURE_PLAYER_SIZE_Y	
+#undef TEXTURE_PATTERN_DIVIDE_X	
+#undef TEXTURE_PATTERN_DIVIDE_Y	
+
+#define TEXTURE_GAME_PLAYER	_T("data/TEXTURE/runningman000.png")	// サンプル用画像
+#define TEXTURE_PLAYER_SIZE_X	(100/2) // テクスチャサイズ
+#define TEXTURE_PLAYER_SIZE_Y	(200/2) // 同上 
+#define TEXTURE_PATTERN_DIVIDE_X	(8)	// アニメパターンのテクスチャ内分割数（X)
+#define TEXTURE_PATTERN_DIVIDE_Y	(1)	// アニメパターンのテクスチャ内分割数（Y)
 }

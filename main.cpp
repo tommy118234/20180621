@@ -389,6 +389,8 @@ void Update(void)
 		UpdatePlayer();
 		// エネミーの更新処理
 		UpdateEnemy();
+		// BGの更新処理
+		UpdateBG();
 		break;
 	case STAGE_GAME:
 		// プレイヤーの更新処理
@@ -541,8 +543,7 @@ void DrawFPS(void)
 void SetStage(int stage)
 {
 	//if( state < 0 || state >= STATE_MAX ) return;		
-	g_nStage = stage;
-	
+	g_nStage = stage;	
 	StopSound(g_pBGM);
 	switch (g_nStage)
 	{
@@ -550,12 +551,17 @@ void SetStage(int stage)
 		g_pBGM = LoadSound(BGM_00);
 		break;
 	case STAGE_TUTOR:
+		SwitchBG(1);
 		g_pBGM = LoadSound(BGM_01);
 		break;
 	case STAGE_GAME:
+		SwitchBG(2);
 		g_pBGM = LoadSound(BGM_02);
+		GetPlayer(0)->gravity = 0;
+		GetPlayer(0)->view_mode = 0;
 		break;
 	case STAGE_GAME_END:
+		SwitchBG(3);
 		g_pBGM = LoadSound(BGM_03);
 		break;
 	case STAGE_RESULT:
