@@ -19,6 +19,8 @@ LPDIRECT3DTEXTURE9		g_pD3DTextureTitleLogo = NULL;	// テクスチャへのポインタ
 
 VERTEX_2D				g_vertexWkTitle[NUM_VERTEX];			// 頂点情報格納ワーク
 VERTEX_2D				g_vertexWkTitleLogo[NUM_VERTEX];		// 頂点情報格納ワーク
+
+ID3DXFont*				font = NULL;                // 文字のポインタ
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -37,6 +39,22 @@ HRESULT InitTitle(void)
 
 									// 頂点情報の作成
 	MakeVertexTitle();
+
+
+	// 文字の読み込み
+	D3DXCreateFont(pDevice,     //D3D Device
+		26,               //Font height
+		0,                //Font width
+		FW_NORMAL,        //Font Weight
+		1,                //MipLevels
+		false,            //Italic
+		DEFAULT_CHARSET,  //CharSet
+		OUT_DEFAULT_PRECIS, //OutputPrecision
+		ANTIALIASED_QUALITY, //Quality
+		DEFAULT_PITCH | FF_DONTCARE,//PitchAndFamily
+		"Georgia",          //pFacename,
+		&font);         //ppFont	
+	
 
 	return S_OK;
 }
@@ -64,11 +82,18 @@ void UninitTitle(void)
 //=============================================================================
 void UpdateTitle(void)
 {
-	if (GetKeyboardTrigger(DIK_RETURN))
-	{// Enter押したら、ステージを切り替える			
+	if (GetKeyboardTrigger(DIK_RETURN) )
+	{// Enter押したら、ステージを切り替える		
 		SetStage(STAGE_TUTOR);
 		//SetStage(STAGE_GAME);
 	}
+	if (GetKeyboardTrigger(DIK_N))
+	{// Enter押したら、ステージを切り替える		
+		//SetStage(STAGE_TUTOR);
+		SetStage(STAGE_GAME);
+	}
+
+
 	// ゲームパッドでで移動処理
 	else if (IsButtonTriggered(0, BUTTON_START))
 	{
@@ -79,8 +104,7 @@ void UpdateTitle(void)
 	{
 		SetStage(STAGE_TUTOR);
 		//SetStage(STAGE_GAME);
-	}
-
+	}	
 }
 
 //=============================================================================
@@ -89,7 +113,6 @@ void UpdateTitle(void)
 void DrawTitle(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
 
@@ -107,7 +130,19 @@ void DrawTitle(void)
 	pDevice->SetTexture(0, g_pD3DTextureTitleLogo);
 
 	// ポリゴンの描画
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWkTitleLogo, sizeof(VERTEX_2D));
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWkTitleLogo, sizeof(VERTEX_2D));	
+
+	// 文字の描画		
+
+	const char* strings[] = { "Press Enter To Start\n Key 'N' to Skip TUTORIAL \n\nProduced by TSUI\n" };
+	D3DCOLOR colors[] = { D3DCOLOR_ARGB(155, 0, 0, 0), D3DCOLOR_ARGB(255, 0, 255, 0), D3DCOLOR_ARGB(255, 0, 0, 255) };
+	RECT r = { SCREEN_WIDTH / 3 + 20, SCREEN_HEIGHT / 2 ,0,0 }; // starting point
+	for (int i = 0; i < _countof(strings); ++i)
+	{
+		font->DrawText(NULL, strings[i], -1, &r, DT_CALCRECT,0);
+		font->DrawText(NULL, strings[i], -1, &r, DT_CENTER, colors[i]);
+		r.left = r.right; // offset for next character.
+	}
 }
 
 //=============================================================================

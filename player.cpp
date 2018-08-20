@@ -29,6 +29,11 @@ int bullet_cooldown = 0;
 int moving_cooldown = 0;
 int acceleration = 0;
 bool jump_cooldown = FALSE;
+
+ID3DXFont*				font2 = NULL;                // 文字のポインタ
+const char* strings2[] = { "戦闘演習を始まりますか？" };
+D3DCOLOR colors2[] = { D3DCOLOR_ARGB(155, 0, 0, 0), D3DCOLOR_ARGB(255, 0, 255, 0), D3DCOLOR_ARGB(255, 0, 0, 255) };
+RECT r2 = { SCREEN_WIDTH / 3 + 20, SCREEN_HEIGHT / 2 ,0,0 }; // starting point
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -45,6 +50,7 @@ HRESULT InitPlayer(int type)
 			TEXTURE_GAME_PLAYER,				// ファイルの名前
 			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
 		g_pSE2 = LoadSound(SE_00);
+			
 	}
 
 	//player->pos = D3DXVECTOR3(SCREEN_CENTER_X + TEXTURE_PLAYER_SIZE_X / 2, SCREEN_CENTER_Y + TEXTURE_PLAYER_SIZE_Y / 2, 0.0f);
@@ -54,10 +60,13 @@ HRESULT InitPlayer(int type)
 	player->PatternAnim = 0;
 	// 頂点情報の作成
 	MakeVertexPlayer();
-	// テクスチャの読み込み
-	D3DXCreateTextureFromFile( pDevice,		// デバイスのポインタ
-		TEXTURE_GAME_PLAYER,				// ファイルの名前
-		&g_pD3DTexturePlayer );			// 読み込むメモリのポインタ	
+	//// テクスチャの読み込み
+	//	D3DXCreateTextureFromFile( pDevice,		// デバイスのポインタ
+	//	TEXTURE_GAME_PLAYER,				// ファイルの名前
+	//	&g_pD3DTexturePlayer );			// 読み込むメモリのポインタ	
+
+
+
 	return S_OK;
 }
 
@@ -78,15 +87,28 @@ void UninitPlayer(void)
 //=============================================================================
 void UpdatePlayer(void)
 {			
+
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	//player->bullet_num = 0;
 	if (player->view_mode == 0) {	
 		LPDIRECT3DDEVICE9 pDevice = GetDevice();
 		D3DXCreateTextureFromFile(pDevice,		// デバイスのポインタ
 			TEXTURE_GAME_PLAYER2,				// ファイルの名前
 			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
+
 	}
-
-
+	D3DXCreateFont(pDevice,     //D3D Device
+		26,						//Font height
+		0,						//Font width
+		FW_NORMAL,				//Font Weight
+		1,						//MipLevels
+		false,					//Italic
+		DEFAULT_CHARSET,		//CharSet
+		OUT_DEFAULT_PRECIS,		//OutputPrecision
+		ANTIALIASED_QUALITY,	//Quality
+		DEFAULT_PITCH | FF_DONTCARE,//PitchAndFamily
+		"Georgia",				//pFacename,
+		&font2);					//ppFont
 	//万有引力
 	if (!jump_cooldown && player->gravity > 0) {
 		player->pos.y += player->gravity + acceleration;
@@ -97,7 +119,6 @@ void UpdatePlayer(void)
 		else if (acceleration < 0)
 			acceleration = 0;
 	}
-
 	//Jump
 	if (jump_cooldown) {
 		if (acceleration > 0) {
@@ -109,7 +130,6 @@ void UpdatePlayer(void)
 			acceleration = 20 + acceleration/2;
 		}
 	}	
-
 	// アニメーション
 	//player->CountAnim = (player->CountAnim +1) % TEXTURE_PATTERN_DIVIDE_X;
 	if (moving_cooldown > 0) {
@@ -117,14 +137,13 @@ void UpdatePlayer(void)
 		if (player->PatternAnim == 1 || player->PatternAnim == 6)
 		moving_cooldown--;
 	}
-
 	// 画面外判定
 	if (player->pos.x < 0) 
 	{
 		player->pos.x =  0;
 	}
 	if (player->pos.x > SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X)
-	{
+	{		
 		player->pos.x = SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X;
 	}
 	if (player->pos.y < 0)
@@ -173,7 +192,7 @@ void UpdatePlayer(void)
 		BULLET *bullet = GetBullet(player->bullet_num );		
 		bullet->use = TRUE;
 		
-		PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+		//PlaySound(g_pSE2, E_DS8_FLAG_NONE);
 		//bullet->direction = player->direction;
 		player->bullet_num = (++player->bullet_num % (BULLET_MAX));
 		bullet_cooldown += 5;
@@ -230,6 +249,18 @@ void DrawPlayer(void)
 	pDevice->SetTexture( 0, g_pD3DTexturePlayer );
 	// ポリゴンの描画
 	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, player->vertexWk, sizeof(VERTEX_2D));	
+	if (player->ready == 1) {// Tutorial Start
+		// 文字の描画
+		const char* strings2[] = { "戦闘演習を始まりますか？(Enter)" };
+		D3DCOLOR colors2[] = { D3DCOLOR_ARGB(155, 255, 255, 255), D3DCOLOR_ARGB(255, 0, 255, 0), D3DCOLOR_ARGB(255, 0, 0, 255) };
+		RECT r2 = {player->pos.x + TEXTURE_PLAYER_SIZE_X/2, player->pos.y - 20 ,0,0 }; // starting point
+		for (int i = 0; i < _countof(strings2); ++i)
+		{
+			font2->DrawText(NULL, strings2[i], -1, &r2, DT_CALCRECT, 0);
+			font2->DrawText(NULL, strings2[i], -1, &r2, DT_CENTER, colors2[i]);
+			r2.left = r2.right; // offset for next character.
+		}
+	}
 }
 
 //=============================================================================
@@ -303,6 +334,7 @@ PLAYER *GetPlayer(int pno)
 
 void ChangePlayer(void)
 {
+
 #undef TEXTURE_GAME_PLAYER	_T	
 #undef TEXTURE_PLAYER_SIZE_X	
 #undef TEXTURE_PLAYER_SIZE_Y	

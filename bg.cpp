@@ -48,15 +48,6 @@ HRESULT InitBG(int type)
 
 	// 頂点情報の作成
 	MakeVertexBG();
-
-	//g_posBG.x = -GetPlayer(0)->pos.x / 4.0f;
-	//g_posBG.y = -GetPlayer(0)->pos.y / 4.0f;
-	//
-	//if (BG00_POS_X - g_posBG.x < 0)
-	//	g_posBG.x = 0;
-	//if (BG00_POS_Y - g_posBG.y < 0)
-	//	g_posBG.y = 0;
-
 	SetVertexBG();
 
 	return S_OK;
@@ -168,7 +159,6 @@ void SwitchBG(int type)
 			TEXTURE_GAME_BG01,								// ファイルの名前
 			&g_pD3DTextureBG);								// 読み込むメモリー
 		break;
-
 	case 2:
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_GAME_BG02,								// ファイルの名前
@@ -182,11 +172,32 @@ void SwitchBG(int type)
 		break;
 
 	case 4:
+		ChangeBG();
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_GAME_BG04,								// ファイルの名前
 			&g_pD3DTextureBG);								// 読み込むメモリー
 		break;
 
+	case 5:
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_GAME_BG05,								// ファイルの名前
+			&g_pD3DTextureBG);								// 読み込むメモリー
+		break;
+	case 6:
+		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
+			TEXTURE_GAME_BG06,								// ファイルの名前
+			&g_pD3DTextureBG);								// 読み込むメモリー
+		break;
+
 	}
 	
+}
+
+void ChangeBG(void)
+{
+#undef  BG00_SIZE_X	
+#undef  BG00_SIZE_Y		
+
+#define  BG00_SIZE_X	(4000)	// テクスチャサイズ
+#define  BG00_SIZE_Y	(2500)	// 同上
 }

@@ -34,7 +34,6 @@ HRESULT Init(HWND hWnd, BOOL bWindow);
 void	Uninit(void);
 void	Update(void);
 void	Draw(void);
-
 void CheckHit(void);
 bool CheckHitBB(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, D3DXVECTOR2 size1, D3DXVECTOR2 size2);
 bool CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float size1, float size2);
@@ -58,6 +57,7 @@ int						g_nCountFPS;				// FPSカウンタ
 
 int						g_nStage = 0;				// ステージ番号
 LPDIRECTSOUNDBUFFER8	g_pBGM;						// BGM用バッファ
+int                     page = 1;					// ステージサブ番号
 //=============================================================================
 // メイン関数
 //=============================================================================
@@ -206,6 +206,7 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	D3DPRESENT_PARAMETERS d3dpp;
 	D3DDISPLAYMODE d3ddm;
 
+
 	srand((unsigned)time(NULL));
 
 	// Direct3Dオブジェクトの作成
@@ -318,7 +319,7 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	// リザルト初期化
 	InitResult();
 	// スコア初期化
-	InitScore(0);
+	InitScore(0);	
 	return S_OK;
 }
 
@@ -370,11 +371,21 @@ void Update(void)
 	case STAGE_TITLE:
 		UpdateTitle();
 		break;
-	case STAGE_TUTOR:
-		
+	case STAGE_TUTOR:		
 		if (GetKeyboardTrigger(DIK_RETURN))
 		{// Enter押したら、ステージを切り替える
-			SetStage(STAGE_GAME);
+			switch (page){
+			case 1:
+				SwitchBG(2);
+				break;
+			case 2:
+				GetPlayer(0)->ready = 1;
+				break;
+			case 3:
+				GetPlayer(0)->ready = 2;
+				SetStage(STAGE_GAME);
+			}
+			page++;
 		}
 		// ゲームパッドでで移動処理
 		else if (IsButtonTriggered(0, BUTTON_START))
@@ -386,9 +397,7 @@ void Update(void)
 			SetStage(STAGE_GAME);
 		}
 		// プレイヤーの更新処理
-		UpdatePlayer();
-		// エネミーの更新処理
-		UpdateEnemy();
+		UpdatePlayer();		
 		// BGの更新処理
 		UpdateBG();
 		break;
@@ -555,20 +564,21 @@ void SetStage(int stage)
 		g_pBGM = LoadSound(BGM_01);
 		break;
 	case STAGE_GAME:
-		SwitchBG(2);
 		g_pBGM = LoadSound(BGM_02);
+		SwitchBG(4);
 		GetPlayer(0)->gravity = 0;
 		GetPlayer(0)->view_mode = 0;
 		break;
 	case STAGE_GAME_END:
-		SwitchBG(3);
 		g_pBGM = LoadSound(BGM_03);
+		SwitchBG(5);
 		break;
 	case STAGE_RESULT:
 		g_pBGM = LoadSound(BGM_04);
+		SwitchBG(6);
 		break;
 	}
-	PlaySound(g_pBGM, E_DS8_FLAG_LOOP);
+	PlaySound(g_pBGM, E_DS8_FLAG_NONE);
 }
 //=============================================================================
 // 当たり判定処理

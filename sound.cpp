@@ -44,8 +44,12 @@ HRESULT InitSound( HWND hWnd )
 
 // 後片付け
 void UninitSound()
-{	
-	SAFE_RELEASE(g_pDirectSound);
+{
+	if (g_pDirectSound != NULL)
+	{
+		g_pDirectSound->Release();
+		g_pDirectSound = NULL;
+	}
 }
 
 // サウンドのロード
@@ -162,8 +166,7 @@ LPDIRECTSOUNDBUFFER8 LoadSound( int no )
 // flag   :1(E_DS8_FLAG_LOOP)ならループ再生
 void PlaySound(  LPDIRECTSOUNDBUFFER8 pBuffer, int flag/*=0*/ )
 {	// 続きから鳴らすので、最初から鳴らしたい場合はSetCurrentPosition(0)をすること
-
-	pBuffer->SetCurrentPosition(0);
+	//pBuffer->SetCurrentPosition(0);
 	pBuffer->Play(0, 0, flag);
 }
 

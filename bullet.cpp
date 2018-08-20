@@ -218,7 +218,7 @@ void SetBullet(D3DXVECTOR3 pos)
 			bullet->pos = pos;				// 座標をセット
 
 											// 発射音再生
-			PlaySound(g_pSE, E_DS8_FLAG_NONE);
+			//PlaySound(g_pSE, E_DS8_FLAG_NONE);
 
 			return;							// 1発セットしたので終了する
 		}

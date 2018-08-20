@@ -31,6 +31,6 @@ HRESULT					InitSound( HWND hWnd );										// 初期化
 void					UninitSound();												// 後片付け
 LPDIRECTSOUNDBUFFER8	LoadSound( int no );										// サウンドのロード
 void					PlaySound( LPDIRECTSOUNDBUFFER8 pBuffer, int flag = 0 );	// 音ごとに再生
-void					StopSound(LPDIRECTSOUNDBUFFER8 pBuffer);	// 音ごとに再生
+void					StopSound(LPDIRECTSOUNDBUFFER8 pBuffer);
 bool					IsPlaying( LPDIRECTSOUNDBUFFER8 pBuffer );					// 再生中かどうか
 #endif

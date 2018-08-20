@@ -55,6 +55,7 @@ typedef struct					// キャラクターの基本構造体
 	int						score = 0;
 	int						gravity = 5;
 	int						view_mode = 1;
+	int                     ready = 0;
 } PLAYER;
 
 //*****************************************************************************

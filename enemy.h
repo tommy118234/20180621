@@ -21,7 +21,7 @@
 #define ANIM_PATTERN_NUM_ENEMY			(TEXTURE_PATTERN_DIVIDE_X_ENEMY*TEXTURE_PATTERN_DIVIDE_Y_ENEMY)	// アニメーションパターン数
 #define TIME_ANIMATION_ENEMY			(50)	// アニメーションの切り替わるカウント
 
-#define ENEMY_MAX						(4)		// 敵の最大数
+#define ENEMY_MAX						(1)		// 敵の最大数
 
 /*******************************************************************************
 * 構造体定義

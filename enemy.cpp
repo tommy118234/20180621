@@ -18,23 +18,22 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT MakeVertexEnemy(void);
-void SetVertexEnemy(void);
-void SetTextureEnemy( int cntPattern );	//
+HRESULT MakeVertexEnemy( int no);
+void SetVertexEnemy(int no);
+void SetTextureEnemy(int no, int cntPattern );	//
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureEnemy = NULL;		// テクスチャへのポリゴン
-VERTEX_2D				g_vertexWk2[NUM_VERTEX];		// 頂点情報格納ワーク
-ENEMY	enemy[ENEMY_MAX];
+LPDIRECT3DTEXTURE9		g_pD3DTextureEnemy = NULL;		// テクスチャへのポリゴン		
+ENEMY					enemyWk[ENEMY_MAX];				// 頂点情報格納ワーク
 //=============================================================================
 // 初期化処理
 //=============================================================================
 HRESULT InitEnemy(int type)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	ENEMY *enemy = GetEnemy(0);	
+	ENEMY *enemy = enemyWk;
 
 	// テクスチャーの初期化を行う？
 	if (type == 0)
@@ -49,22 +48,20 @@ HRESULT InitEnemy(int type)
 	// エネミーの初期化処理
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
-		enemy->use = true;
-		//enemy->pos = D3DXVECTOR3(TEXTURE_ENEMY_SIZE_X, SCREEN_CENTER_Y - TEXTURE_ENEMY_SIZE_Y / 2, 0.0f);
-		enemy->pos = D3DXVECTOR3(SCREEN_CENTER_X,  TEXTURE_ENEMY_SIZE_Y, 0.0f);
-		
-		enemy->rot = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-		enemy->CountAnim = 0;
-		enemy->PatternAnim = 0;
-		enemy->status.HP = 10;
+		enemy->use = true;										// 使用
+		enemy->pos = D3DXVECTOR3(SCREEN_CENTER_X + (i-2) * TEXTURE_ENEMY_SIZE_X,  TEXTURE_ENEMY_SIZE_Y, 0.0f);	 // 座標データを初期化	
+		enemy->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);				// 回転データを初期化
+		enemy->CountAnim = 0;									// アニメパターン番号をランダムで初期化
+		enemy->PatternAnim = 0;									// アニメカウントを初期化
+		enemy->status.HP = 5;									// HPを初期化
 
 		//enemy Base Angle, Radius
 		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X / 2, TEXTURE_ENEMY_SIZE_Y / 2);
 		enemy->Radius = D3DXVec2Length(&temp);
 		enemy->BaseAngle = atan2f(TEXTURE_ENEMY_SIZE_Y, TEXTURE_ENEMY_SIZE_X);
 
-		// 頂点情報の作成
-		MakeVertexEnemy();			// 読み込むメモリのポインタ
+		enemy->Texture = g_pD3DTextureEnemy;					// テクスチャ情報		
+		MakeVertexEnemy(i);										// 頂点情報の作成
 	}
 	return S_OK;
 }
@@ -73,12 +70,12 @@ HRESULT InitEnemy(int type)
 // 終了処理
 //=============================================================================
 void UninitEnemy(void)
-{
-	if( g_pD3DTextureEnemy != NULL )	//
-	{	// テクスチャの開放
-		g_pD3DTextureEnemy->Release();
-		g_pD3DTextureEnemy = NULL;
-	}
+{	
+		if (g_pD3DTextureEnemy != NULL)	//
+		{	// テクスチャの開放
+			g_pD3DTextureEnemy->Release();
+			g_pD3DTextureEnemy = NULL;
+		}	
 }
 
 //=============================================================================
@@ -86,28 +83,37 @@ void UninitEnemy(void)
 //=============================================================================
 void UpdateEnemy(void)
 {
-	// アニメーション
-	enemy->CountAnim  = (enemy->CountAnim  +1) % ANIM_PATTERN_NUM_ENEMY;
-	enemy->PatternAnim = (enemy->PatternAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
+	ENEMY *enemy = enemyWk;				// エネミーのポインターを初期化
 
-	if (enemy->pos.x < 0) 
+	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
-		enemy->pos.x = SCREEN_WIDTH - TEXTURE_ENEMY_SIZE_X / 2;
+		if (enemy->use == true)			// 使用している状態なら更新する
+		{
+			// アニメーション
+			enemy->CountAnim = (enemy->CountAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
+			enemy->PatternAnim = (enemy->PatternAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
+
+			if (enemy->pos.x < 0)
+			{
+				enemy->pos.x = 0;
+			}
+			if (enemy->pos.x > SCREEN_WIDTH - TEXTURE_ENEMY_SIZE_X)
+			{
+				enemy->pos.x = SCREEN_WIDTH - TEXTURE_ENEMY_SIZE_X;
+			}
+			if (enemy->pos.y < 0)
+			{
+				enemy->pos.y = 0;
+			}
+			if (enemy->pos.y > SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y)
+			{
+				enemy->pos.y = SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y;
+			}
+			enemy->rot.z = enemy->rot.z - 0.1;
+
+			SetVertexEnemy(i);
+		}
 	}
-	if (enemy->pos.x > SCREEN_WIDTH - TEXTURE_ENEMY_SIZE_X / 2)
-	{
-		enemy->pos.x = 0;
-	}
-	if (enemy->pos.y < 0)
-	{
-		enemy->pos.y = SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y;
-	}
-	if (enemy->pos.y > SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y)
-	{
-		enemy->pos.y = 0;
-	}
-	
-	MakeVertexEnemy();
 }
 
 //=============================================================================
@@ -115,77 +121,94 @@ void UpdateEnemy(void)
 //=============================================================================
 void DrawEnemy(void)
 {
-	ENEMY  *enemy = GetEnemy(0);
-	if (enemy->use) {
-		LPDIRECT3DDEVICE9 pDevice = GetDevice();
-		// 頂点フォーマットの設定
-		pDevice->SetFVF(FVF_VERTEX_2D);
-		// テクスチャの設定
-		pDevice->SetTexture(0, g_pD3DTextureEnemy);
-		// ポリゴンの描画
-		pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWk2, sizeof(VERTEX_2D));
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	ENEMY *enemy = enemyWk;				// エネミーのポインターを初期化
+
+	// 頂点フォーマットの設定
+	pDevice->SetFVF(FVF_VERTEX_2D);
+
+	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
+	{
+		if (enemy->use == true)			// 使用している状態なら描画する
+		{
+			// テクスチャの設定
+			pDevice->SetTexture(0, enemy->Texture);
+			// ポリゴンの描画
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, enemy->vertexWk, sizeof(VERTEX_2D));
+		}
 	}
 }
 
 //=============================================================================
 // 頂点の作成
 //=============================================================================
-HRESULT MakeVertexEnemy(void)
+HRESULT MakeVertexEnemy(int no)
 {
-	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();	
+	ENEMY *enemy = &enemyWk[no];			// エネミーのポインターを初期化
+
 	// 頂点座標の設定
-	SetVertexEnemy();
+	SetVertexEnemy(no);
 	// rhwの設定
-	g_vertexWk2[0].rhw =
-	g_vertexWk2[1].rhw =
-	g_vertexWk2[2].rhw =
-	g_vertexWk2[3].rhw = 1.0f;
+	enemy->vertexWk[0].rhw =
+	enemy->vertexWk[1].rhw =
+	enemy->vertexWk[2].rhw =
+	enemy->vertexWk[3].rhw = 1.0f;
 	// 反射光の設定
-	g_vertexWk2[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-	g_vertexWk2[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-	g_vertexWk2[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-	g_vertexWk2[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	enemy->vertexWk[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	enemy->vertexWk[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	enemy->vertexWk[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	enemy->vertexWk[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+
 	// テクスチャ座標の設定
-	SetTextureEnemy(enemy->PatternAnim);
+	enemy->vertexWk[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+	enemy->vertexWk[1].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_ENEMY, 0.0f);
+	enemy->vertexWk[2].tex = D3DXVECTOR2(0.0f, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
+	enemy->vertexWk[3].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_ENEMY, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
+
+
 	return S_OK;
 }
 
 //=============================================================================
 // 頂点座標の設定
 //=============================================================================
-void SetVertexEnemy(void)
+void SetVertexEnemy(int no)
 {
-	//// 頂点座標の設定
-	//g_vertexWk2[0].vtx = D3DXVECTOR3(enemy->pos.x, enemy->pos.y, enemy->pos.z);
-	//g_vertexWk2[1].vtx = D3DXVECTOR3(enemy->pos.x + TEXTURE_ENEMY_SIZE_X, enemy->pos.y, enemy->pos.z);
-	//g_vertexWk2[2].vtx = D3DXVECTOR3(enemy->pos.x, enemy->pos.y + TEXTURE_ENEMY_SIZE_Y, enemy->pos.z);
-	//g_vertexWk2[3].vtx = D3DXVECTOR3(enemy->pos.x + TEXTURE_ENEMY_SIZE_X, enemy->pos.y + TEXTURE_ENEMY_SIZE_Y, enemy->pos.z);
+	ENEMY *enemy = &enemyWk[no];			// エネミーのポインターを初期化
 	
-	// 回転頂点座標の設定
-	enemy->rot.z = enemy->rot.z - 0.1;
+	// 頂点座標の設定
+	enemy->vertexWk[0].vtx.x = enemy->pos.x - cosf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[0].vtx.y = enemy->pos.y - sinf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[0].vtx.z = 0.0f;
 
-	g_vertexWk2[0].vtx.x = enemy->pos.x - cos(enemy->BaseAngle + enemy->rot.z)* enemy->Radius;
-	g_vertexWk2[0].vtx.y = enemy->pos.y - sin(enemy->BaseAngle + enemy->rot.z)* enemy->Radius;
-	
-	g_vertexWk2[1].vtx.x = enemy->pos.x + cos(enemy->BaseAngle - enemy->rot.z)* enemy->Radius;
-	g_vertexWk2[1].vtx.y = enemy->pos.y - sin(enemy->BaseAngle - enemy->rot.z)* enemy->Radius;
-	
-	g_vertexWk2[2].vtx.x = enemy->pos.x - cos(enemy->BaseAngle - enemy->rot.z)* enemy->Radius;
-	g_vertexWk2[2].vtx.y = enemy->pos.y + sin(enemy->BaseAngle - enemy->rot.z)* enemy->Radius;
-	
-	g_vertexWk2[3].vtx.x = enemy->pos.x + cos(enemy->BaseAngle + enemy->rot.z)* enemy->Radius;
-	g_vertexWk2[3].vtx.y = enemy->pos.y + sin(enemy->BaseAngle + enemy->rot.z)* enemy->Radius;
+	enemy->vertexWk[1].vtx.x = enemy->pos.x + cosf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[1].vtx.y = enemy->pos.y - sinf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[1].vtx.z = 0.0f;
+
+	enemy->vertexWk[2].vtx.x = enemy->pos.x - cosf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[2].vtx.y = enemy->pos.y + sinf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[2].vtx.z = 0.0f;
+
+	enemy->vertexWk[3].vtx.x = enemy->pos.x + cosf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[3].vtx.y = enemy->pos.y + sinf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[3].vtx.z = 0.0f;
 }
 //=============================================================================
 // テクスチャ座標の設定
 //=============================================================================
-void SetTextureEnemy( int cntPattern )
+void SetTextureEnemy( int no, int cntPattern )
 {
+	ENEMY *enemy = &enemyWk[no];			// エネミーのポインターを初期化
 	// テクスチャ座標の設定
-	g_vertexWk2[0].tex = D3DXVECTOR2((float)(cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY, (float)(cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
-	g_vertexWk2[1].tex = D3DXVECTOR2((float)((cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY, (float)(cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
-	g_vertexWk2[2].tex = D3DXVECTOR2((float)(cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY, (float)((cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
-	g_vertexWk2[3].tex = D3DXVECTOR2((float)((cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY, (float)((cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
+	enemy->vertexWk[0].tex = D3DXVECTOR2((float)(cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY, 
+						(float)(cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
+	enemy->vertexWk[1].tex = D3DXVECTOR2((float)((cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY,
+						(float)(cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
+	enemy->vertexWk[2].tex = D3DXVECTOR2((float)(cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY,
+						(float)((cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
+	enemy->vertexWk[3].tex = D3DXVECTOR2((float)((cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY,
+						(float)((cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) + 1) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);
 }
 /*******************************************************************************
 関数名:	ENEMY *GetMapAdr( int pno )
@@ -195,5 +218,5 @@ void SetTextureEnemy( int cntPattern )
 *******************************************************************************/
 ENEMY *GetEnemy(int pno)
 {
-	return &enemy[pno];
+	return &enemyWk[pno];
 }
