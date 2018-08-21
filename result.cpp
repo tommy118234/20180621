@@ -29,15 +29,16 @@ HRESULT InitResult(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	
+	
 	// テクスチャの読み込み
 	D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-								TEXTURE_RESULT,				// ファイルの名前
-								&g_pD3DTextureResult);		// 読み込むメモリー
+		TEXTURE_RESULT,				// ファイルの名前
+		&g_pD3DTextureResult);		// 読み込むメモリー
 
 	D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
-								TEXTURE_RESULT_LOGO,		// ファイルの名前
-								&g_pD3DTextureResultLogo);	// 読み込むメモリー
-
+		TEXTURE_RESULT_LOGO,		// ファイルの名前
+		&g_pD3DTextureResultLogo);	// 読み込むメモリー
+	
 	// 頂点情報の作成
 	MakeVertexResult();
 

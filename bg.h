@@ -8,14 +8,13 @@
 #define _BG_H_
 
 // ƒ}ƒNƒ’è‹`
-//#define TEXTURE_GAME_BG00		_T("data/TEXTURE/earth.png")	// ƒTƒ“ƒvƒ‹—p‰æ‘œ
-#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")		// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG01		_T("data/BG/story1.png")	// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG02		_T("data/BG/story2.png")	// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG03		_T("data/BG/battleGuide.png")// ”wŒi‰æ‘œ
+#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")			// ”wŒi‰æ‘œ
+#define TEXTURE_GAME_BG01		_T("data/BG/story1.png")		// ”wŒi‰æ‘œ
+#define TEXTURE_GAME_BG02		_T("data/BG/story2.png")		// ”wŒi‰æ‘œ
+#define TEXTURE_GAME_BG03		_T("data/BG/battleGuide.png")	// ”wŒi‰æ‘œ
 #define TEXTURE_GAME_BG04		_T("data/BG/battle_ice.png")	// ”wŒi‰æ‘œ
 #define TEXTURE_GAME_BG05		_T("data/BG/ice_castle.png")	// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG06		_T("data/BG/moon_red.png")	// ”wŒi‰æ‘œ
+#define TEXTURE_GAME_BG06		_T("data/BG/moon_red.png")		// ”wŒi‰æ‘œ
 
 #define BG00_SIZE_X			(800)//800)	// ƒeƒNƒXƒ`ƒƒƒTƒCƒY
 #define BG00_SIZE_Y			(600)//600)	// “¯ã

@@ -20,7 +20,6 @@ const TCHAR* c_soundFilename[] = {
 	_T("data/BGM/cyber_battle.wav"),
 	_T("data/BGM/forest1.wav"),
 	_T("data/BGM/crystal3.wav"),
-	_T("data/BGM/moonlight.wav"),
 	_T("data/SE/bomb000.wav")
 };
 
@@ -156,7 +155,6 @@ LPDIRECTSOUNDBUFFER8 LoadSound( int no )
 
 	// バッファロック解除
 	pBuffer->Unlock(pBlock, dwSize, 0, 0);
-
 	// セカンダリバッファを返してようやく完了...
 	return pBuffer;
 }
@@ -166,7 +164,7 @@ LPDIRECTSOUNDBUFFER8 LoadSound( int no )
 // flag   :1(E_DS8_FLAG_LOOP)ならループ再生
 void PlaySound(  LPDIRECTSOUNDBUFFER8 pBuffer, int flag/*=0*/ )
 {	// 続きから鳴らすので、最初から鳴らしたい場合はSetCurrentPosition(0)をすること
-	//pBuffer->SetCurrentPosition(0);
+	pBuffer->SetCurrentPosition(0);
 	pBuffer->Play(0, 0, flag);
 }
 
@@ -178,7 +176,7 @@ void StopSound( LPDIRECTSOUNDBUFFER8 pBuffer )
 	pBuffer->GetStatus(&status);
 	if( status & DSBSTATUS_PLAYING )	// 鳴っていたら
 	{
-		pBuffer->Stop();	// 意味的にはPauseになる。
+		pBuffer->Stop();	// 意味的にはPauseになる。		
 	}
 }
 
@@ -187,7 +185,6 @@ void StopSound( LPDIRECTSOUNDBUFFER8 pBuffer )
 bool IsPlaying( LPDIRECTSOUNDBUFFER8 pBuffer )
 {
 	DWORD status;
-
 	pBuffer->GetStatus(&status);
 	if( status & DSBSTATUS_PLAYING )
 	{

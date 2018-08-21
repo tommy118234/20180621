@@ -44,13 +44,13 @@ BYTE					g_keyStateRepeat[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
 BYTE					g_keyStateRelease[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
 int						g_keyStateRepeatCnt[NUM_KEY_MAX];	// キーボードのリピートカウンタ
 
-															//--------------------------------- mouse
+//--------------------------------- mouse
 static LPDIRECTINPUTDEVICE8 pMouse = NULL; // mouse
 
 static DIMOUSESTATE2   mouseState;		// マウスのダイレクトな状態
 static DIMOUSESTATE2   mouseTrigger;	// 押された瞬間だけON
 
-										//--------------------------------- game pad
+//--------------------------------- game pad
 
 static LPDIRECTINPUTDEVICE8	pGamePad[GAMEPADMAX] = { NULL,NULL,NULL,NULL };// パッドデバイス
 

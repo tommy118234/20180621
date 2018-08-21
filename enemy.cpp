@@ -6,9 +6,12 @@
 ********************************************************************************/
 
 #include "main.h"
+#include "player.h"
 #include "enemy.h"
 #include "input.h"
 #include "math.h"
+#include "bg.h"
+
 
 //*****************************************************************************
 // マクロ定義
@@ -43,13 +46,16 @@ HRESULT InitEnemy(int type)
 			TEXTURE_GAME_ENEMY,				// ファイルの名前
 			&g_pD3DTextureEnemy);			// 読み込むメモリのポインタ
 	}
+	else if (type == 1) {
+		UninitEnemy;
+	}
 
 
 	// エネミーの初期化処理
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
 		enemy->use = true;										// 使用
-		enemy->pos = D3DXVECTOR3(SCREEN_CENTER_X + (i-2) * TEXTURE_ENEMY_SIZE_X,  TEXTURE_ENEMY_SIZE_Y, 0.0f);	 // 座標データを初期化	
+		enemy->pos = D3DXVECTOR3(SCREEN_CENTER_X, TEXTURE_ENEMY_SIZE_Y/2, 0.0f);	 // 座標データを初期化	
 		enemy->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);				// 回転データを初期化
 		enemy->CountAnim = 0;									// アニメパターン番号をランダムで初期化
 		enemy->PatternAnim = 0;									// アニメカウントを初期化
@@ -93,6 +99,16 @@ void UpdateEnemy(void)
 			enemy->CountAnim = (enemy->CountAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
 			enemy->PatternAnim = (enemy->PatternAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
 
+
+			//if (GetKeyboardPress(DIK_LEFT)) {
+			//	
+			//	enemy->pos.x += 2.5;
+			//}
+			//if (GetKeyboardPress(DIK_RIGHT)) {
+			//	
+			//	enemy->pos.x -= 2.5;
+			//}
+
 			if (enemy->pos.x < 0)
 			{
 				enemy->pos.x = 0;
@@ -109,8 +125,17 @@ void UpdateEnemy(void)
 			{
 				enemy->pos.y = SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y;
 			}
-			enemy->rot.z = enemy->rot.z - 0.1;
+			// スクロール処理
+			//if (GetKeyboardPress(DIK_LEFT)) {
+			//
+			//	enemy->pos.x += 5;
+			//}
+			//if (GetKeyboardPress(DIK_RIGHT)) {
+			//	enemy->pos.x -= 5;
+			//}
 
+			//enemy->rot.z -= 0.1
+			//enemy->pos = D3DXVECTOR3(BG00_SIZE_X - TEXTURE_ENEMY_SIZE_X/2,  0, 0.0f);	 // 座標データを初期化	
 			SetVertexEnemy(i);
 		}
 	}
@@ -200,6 +225,7 @@ void SetVertexEnemy(int no)
 void SetTextureEnemy( int no, int cntPattern )
 {
 	ENEMY *enemy = &enemyWk[no];			// エネミーのポインターを初期化
+
 	// テクスチャ座標の設定
 	enemy->vertexWk[0].tex = D3DXVECTOR2((float)(cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_X_ENEMY, 
 						(float)(cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY) / (float)TEXTURE_PATTERN_DIVIDE_Y_ENEMY);

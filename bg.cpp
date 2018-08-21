@@ -27,14 +27,13 @@ LPDIRECT3DTEXTURE9		g_pD3DTextureBG = NULL;		// テクスチャへのポインタ
 VERTEX_2D				g_vertexWkBG[NUM_VERTEX];	// 頂点情報格納ワーク
 
 D3DXVECTOR3				g_posBG;					// 背景の位置
-
 //=============================================================================
 // 初期化処理
 //=============================================================================
 HRESULT InitBG(int type)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
+	
 	// テクスチャーの初期化を行う？
 	if (type == 0)
 	{
@@ -42,6 +41,14 @@ HRESULT InitBG(int type)
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_GAME_BG00,		// ファイルの名前
 			&g_pD3DTextureBG);		// 読み込むメモリー
+	}
+	else if (type == 1) 
+	{
+		if (g_pD3DTextureBG != NULL)
+		{// テクスチャの開放
+			g_pD3DTextureBG->Release();
+			g_pD3DTextureBG = NULL;
+		}
 	}
 
 	g_posBG = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -75,13 +82,7 @@ void UpdateBG(void)
 
 	// スクロール処理
 	g_posBG.x = -GetPlayer(0)->pos.x / 4.0f;
-	g_posBG.y = -GetPlayer(0)->pos.y / 4.0f;
-
-	if (BG00_POS_X - g_posBG.x < 0)
-		g_posBG.x = 0;
-	if (BG00_POS_Y - g_posBG.y < 0)
-		g_posBG.y = 0;
-
+	
 	SetVertexBG();
 }
 
@@ -91,13 +92,10 @@ void UpdateBG(void)
 void DrawBG(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
-
 	// テクスチャの設定
 	pDevice->SetTexture(0, g_pD3DTextureBG);
-
 	// ポリゴンの描画
 	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_POLYGON, g_vertexWkBG, sizeof(VERTEX_2D));
 }
@@ -115,9 +113,9 @@ HRESULT MakeVertexBG(void)
 
 	// rhwの設定
 	g_vertexWkBG[0].rhw =
-		g_vertexWkBG[1].rhw =
-		g_vertexWkBG[2].rhw =
-		g_vertexWkBG[3].rhw = 1.0f;
+	g_vertexWkBG[1].rhw =
+	g_vertexWkBG[2].rhw =
+	g_vertexWkBG[3].rhw = 1.0f;
 
 	// 反射光の設定
 	g_vertexWkBG[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
@@ -152,12 +150,17 @@ void SetVertexBG(void)
 void SwitchBG(int type)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	if (g_pD3DTextureBG != NULL)
+	{// テクスチャの開放
+		g_pD3DTextureBG->Release();
+		g_pD3DTextureBG = NULL;
+	}
 	switch (type)
 	{
-	case 1:
+	case 1:		
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
 			TEXTURE_GAME_BG01,								// ファイルの名前
-			&g_pD3DTextureBG);								// 読み込むメモリー
+			&g_pD3DTextureBG);								// 読み込むメモリー		
 		break;
 	case 2:
 		D3DXCreateTextureFromFile(pDevice,					// デバイスへのポインタ
@@ -190,6 +193,9 @@ void SwitchBG(int type)
 		break;
 
 	}
+
+	//// テクスチャの設定
+	//pDevice->SetTexture(0, g_pD3DTextureBG);
 	
 }
 

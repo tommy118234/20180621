@@ -44,6 +44,9 @@ HRESULT InitScore(int type)
 			TEXTURE_GAME_SCORE00,				// ファイルの名前
 			&g_pD3DTextureScore);				// 読み込むメモリのポインタ
 	}
+	else if (type == 1) {
+		UninitScore;
+	}
 
 	g_posScore = D3DXVECTOR3((float)SCORE_POS_X, (float)SCORE_POS_Y, 0.0f);
 	g_nScore = 0;
@@ -73,10 +76,7 @@ void UninitScore(void)
 void UpdateScore(void)
 {
 	// 毎フレーム実行される処理を記述する
-
-
 	SetTextureScore();
-
 }
 
 //=============================================================================

@@ -6,7 +6,9 @@
 ********************************************************************************/
 #include "main.h"
 #include "title.h"
+#include "player.h"
 #include "input.h"
+#include "bg.h"
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -43,7 +45,7 @@ HRESULT InitTitle(void)
 
 	// 文字の読み込み
 	D3DXCreateFont(pDevice,     //D3D Device
-		26,               //Font height
+		30,               //Font height
 		0,                //Font width
 		FW_NORMAL,        //Font Weight
 		1,                //MipLevels
@@ -52,7 +54,7 @@ HRESULT InitTitle(void)
 		OUT_DEFAULT_PRECIS, //OutputPrecision
 		ANTIALIASED_QUALITY, //Quality
 		DEFAULT_PITCH | FF_DONTCARE,//PitchAndFamily
-		"Georgia",          //pFacename,
+		"Algerian",          //pFacename,
 		&font);         //ppFont	
 	
 
@@ -84,16 +86,18 @@ void UpdateTitle(void)
 {
 	if (GetKeyboardTrigger(DIK_RETURN) )
 	{// Enter押したら、ステージを切り替える		
-		SetStage(STAGE_TUTOR);
+		SetStage(1);		
 		//SetStage(STAGE_GAME);
 	}
 	if (GetKeyboardTrigger(DIK_N))
-	{// Enter押したら、ステージを切り替える		
+	{// N押したら、ステージを切り替える		
 		//SetStage(STAGE_TUTOR);
+		GetPlayer(0)->ready = 2;
+
+		GetPlayer(0)->view_mode = 0;
+		SwitchBG(4);	
 		SetStage(STAGE_GAME);
 	}
-
-
 	// ゲームパッドでで移動処理
 	else if (IsButtonTriggered(0, BUTTON_START))
 	{
@@ -134,15 +138,13 @@ void DrawTitle(void)
 
 	// 文字の描画		
 
-	const char* strings[] = { "Press Enter To Start\n Key 'N' to Skip TUTORIAL \n\nProduced by TSUI\n" };
-	D3DCOLOR colors[] = { D3DCOLOR_ARGB(155, 0, 0, 0), D3DCOLOR_ARGB(255, 0, 255, 0), D3DCOLOR_ARGB(255, 0, 0, 255) };
-	RECT r = { SCREEN_WIDTH / 3 + 20, SCREEN_HEIGHT / 2 ,0,0 }; // starting point
-	for (int i = 0; i < _countof(strings); ++i)
-	{
-		font->DrawText(NULL, strings[i], -1, &r, DT_CALCRECT,0);
-		font->DrawText(NULL, strings[i], -1, &r, DT_CENTER, colors[i]);
-		r.left = r.right; // offset for next character.
-	}
+	const char* strings[] = { "'Enter' To Start,\n\n 'N' to Skip Tutorial", "Produced by TSUI" };
+	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 53, 211, 255), D3DCOLOR_ARGB(255, 237, 255, 84)};
+	RECT r = { 0  , SCREEN_HEIGHT / 4 ,SCREEN_WIDTH,SCREEN_HEIGHT }; // starting point
+	RECT r2 = { 0 , 2* SCREEN_HEIGHT/3 ,SCREEN_WIDTH/2,SCREEN_HEIGHT}; // starting point	
+	font->DrawText(NULL, strings[0], -1, &r, DT_CENTER | DT_VCENTER, colors[0]);
+	font->DrawText(NULL, strings[1], -1, &r2, DT_CENTER | DT_VCENTER, colors[1]);
+	
 }
 
 //=============================================================================

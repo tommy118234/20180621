@@ -40,15 +40,9 @@
 
 // 頂点フォーマット( 頂点座標[2D] / 反射光 / テクスチャ座標 )
 #define	FVF_VERTEX_2D	(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-// 共通パラメータ用
-//#define	NAME_MAX	(256)		// 名前BufのMAX
-//#define PLAYER_MAX	(1)			// プレイヤーの数
-//#define ENEMY_MAX	(1)			// 敵の数
-//#define BULLET_MAX	(200)		// Bulletの数
-//#define SCORE_MAX	(5)			// Scoreの数
-//#define MAP_MAX     (1)			// Mapの数
 #define FPS_RATE			(30)						// FPS
 #define SAFE_RELEASE(ptr)	{if(ptr){(ptr)->Release();(ptr) = NULL;}}
+
 /*******************************************************************************
 * 構造体定義
 *******************************************************************************/
@@ -79,8 +73,7 @@ enum E_STAGE
 	STAGE_TUTOR,
 	STAGE_GAME,
 	STAGE_GAME_END,
-	STAGE_RESULT,
-	STAGE_MAX
+	STAGE_RESULT
 };
 
 //*****************************************************************************

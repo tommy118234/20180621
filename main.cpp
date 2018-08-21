@@ -20,7 +20,7 @@
 // マクロ定義
 //*****************************************************************************
 #define CLASS_NAME			_T("AppClass")			// ウインドウのクラス名
-#define WINDOW_NAME			_T("VOID FUNC")		// ウインドウのキャプション名
+#define WINDOW_NAME			_T("VOID FUNC")			// ウインドウのキャプション名
 
 //*****************************************************************************
 // 構造体定義
@@ -34,14 +34,14 @@ HRESULT Init(HWND hWnd, BOOL bWindow);
 void	Uninit(void);
 void	Update(void);
 void	Draw(void);
-void CheckHit(void);
-bool CheckHitBB(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, D3DXVECTOR2 size1, D3DXVECTOR2 size2);
-bool CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float size1, float size2);
+void	CheckHit(void);
+bool	CheckHitBB(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, D3DXVECTOR2 size1, D3DXVECTOR2 size2);
+bool	CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float size1, float size2);
 
 void InitGame(void);
 
 #ifdef _DEBUG
-void DrawFPS(void);
+void DrawDebugFont(void);
 #endif
 
 //*****************************************************************************
@@ -58,6 +58,7 @@ int						g_nCountFPS;				// FPSカウンタ
 int						g_nStage = 0;				// ステージ番号
 LPDIRECTSOUNDBUFFER8	g_pBGM;						// BGM用バッファ
 int                     page = 1;					// ステージサブ番号
+
 //=============================================================================
 // メイン関数
 //=============================================================================
@@ -86,8 +87,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		CLASS_NAME,
 		NULL
 	};
-	HWND		hWnd;
+	
 	MSG			msg;
+	HWND		hWnd;
 	
 	// ウィンドウクラスの登録
 	RegisterClassEx(&wcex);
@@ -319,7 +321,8 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	// リザルト初期化
 	InitResult();
 	// スコア初期化
-	InitScore(0);	
+	InitScore(0);
+
 	return S_OK;
 }
 
@@ -349,10 +352,14 @@ void Uninit(void)
 		g_pD3DDevice->Release();
 	}	
 	if (g_pD3D != NULL)
-	{	// Direct3Dオブジェクトの開放
+	{// Direct3Dオブジェクトの開放
 		g_pD3D->Release();
-		// サウンド処理の終了処理
-		SAFE_RELEASE(g_pBGM);
+	}
+	// サウンド処理の終了処理
+	if (g_pD3D != NULL)
+	{
+		g_pBGM->Release();
+		g_pBGM = NULL;
 	}
 	UninitSound();
 	
@@ -369,7 +376,9 @@ void Update(void)
 	switch (g_nStage)
 	{
 	case STAGE_TITLE:
-		UpdateTitle();
+		if (GetKeyboardTrigger(DIK_RETURN))
+		SwitchBG(1);
+		UpdateTitle();		
 		break;
 	case STAGE_TUTOR:		
 		if (GetKeyboardTrigger(DIK_RETURN))
@@ -377,15 +386,21 @@ void Update(void)
 			switch (page){
 			case 1:
 				SwitchBG(2);
+				page++;
 				break;
 			case 2:
 				GetPlayer(0)->ready = 1;
+				SwitchBG(3);
+				page++;
 				break;
 			case 3:
 				GetPlayer(0)->ready = 2;
+				GetPlayer(0)->view_mode = 0;
+				SwitchBG(4);
+				page = 1;
 				SetStage(STAGE_GAME);
+				break;
 			}
-			page++;
 		}
 		// ゲームパッドでで移動処理
 		else if (IsButtonTriggered(0, BUTTON_START))
@@ -401,37 +416,38 @@ void Update(void)
 		// BGの更新処理
 		UpdateBG();
 		break;
-	case STAGE_GAME:
-		// プレイヤーの更新処理
-		UpdatePlayer();
-		// エネミーの更新処理
-		UpdateEnemy();
-		// バレットの更新処理
-		UpdateBullet();
+	case STAGE_GAME:		
 		// BGの更新処理
 		UpdateBG();
+		// エネミーの更新処理
+		UpdateEnemy();
+		// プレイヤーの更新処理
+		UpdatePlayer();
+		// バレットの更新処理
+		UpdateBullet();
 		// スコアの更新処理
 		UpdateScore();
 		// 当たり判定
 		CheckHit();
 		break;
-	case STAGE_GAME_END:
+	case STAGE_GAME_END:		
 		// スコアの更新処理
 		UpdateScore();
-
 		if (GetKeyboardTrigger(DIK_RETURN))
 		{// Enter押したら、ステージを切り替える
 			InitGame();				// ゲームの再初期化処理
+			//SwitchBG(5);
 			SetStage(STAGE_RESULT);
 		}
 		else if (IsButtonTriggered(0, BUTTON_B))
 		{
 			InitGame();				// ゲームの再初期化処理
+			//SwitchBG(5);
 			SetStage(STAGE_RESULT);
 		}
 		break;
 	case STAGE_RESULT:
-		UpdateResult();
+		UpdateResult();	
 		break;
 	}
 }
@@ -459,7 +475,6 @@ void Draw(void)
 			DrawPlayer();
 			break;
 		case STAGE_GAME:
-		case STAGE_GAME_END:
 			// BGの描画処理
 			DrawBG();
 			// エネミーの描画処理
@@ -471,13 +486,19 @@ void Draw(void)
 			// スコアの描画処理
 			DrawScore();
 			break;
+		case STAGE_GAME_END:
+			// BGの描画処理
+			DrawBG();			
+			// スコアの描画処理
+			DrawScore();
+			break;
 		case STAGE_RESULT:
 			DrawResult();
 			break;
 		}
 #ifdef _DEBUG
-		// FPS表示
-		DrawFPS();
+		// バッグ表示
+		DrawDebugFont();
 #endif
 		// Direct3Dによる描画の終了
 		g_pD3DDevice->EndScene();
@@ -498,93 +519,43 @@ LPDIRECT3DDEVICE9 GetDevice(void)
 //=============================================================================
 // FPS表示処理
 //=============================================================================
-void DrawFPS(void)
+void DrawDebugFont(void)
 {
 	RECT rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 	TCHAR str[256];
-	wsprintf(str, _T("FPS:%d\nENEMY HP:%d\n"), g_nCountFPS, GetEnemy(0)->status.HP);
-	//wsprintf(str, _T("ENEMY HP:%d\n"));
+	PLAYER *player = GetPlayer(0);	
+	
 	// テキスト描画
+	sprintf(str, _T("FPS:%d"), g_nCountFPS);
+	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
+
+	rect.top = 20;
+	sprintf(str, "PX:%f  PY:%f", player->pos.x, player->pos.y);
 	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
 }
 #endif
-//=============================================================================
-// 当たり判定関数
-//=============================================================================
-//void HitTest(void)
-//{
-//	PLAYER *player = GetPlayer(0);
-//	ENEMY  *enemy = GetEnemy(0);
-//	//SCORE *score = GetScore(0);
-//	for (int i = 0; i < player->bullet_num + 1; i++) {
-//		BULLET *bullet = GetBullet(i);		
-//		if (bullet->use) {
-//			//OutputDebugStringA("B ");
-//			/*
-//			if (((bullet->pos.x + TEXTURE_SAMPLE00_SIZE_X3) > enemy->pos.x) &&
-//				((bullet->pos.x) < enemy->pos.x + TEXTURE_SAMPLE00_SIZE_X2))  //横だけ当たり
-//			{
-//				if (((bullet->pos.y + TEXTURE_SAMPLE00_SIZE_Y3) > enemy->pos.y) &&
-//					((bullet->pos.y) < enemy->pos.y + TEXTURE_SAMPLE00_SIZE_Y2))  //横と縱当たり
-//				{				
-//					//スコア UP
-// 					player->score = player->score + 1;
-//					bullet->use = FALSE;
-//					//enemy->use = FALSE;
-//				}
-//			}*/
-//			D3DXVECTOR2 temp = D3DXVECTOR2(bullet->pos.x - enemy->pos.x, bullet->pos.y - enemy->pos.y);
-//			if ((enemy->Radius + bullet->Radius ) > D3DXVec2Length(&temp))
-//			{				
-//				//スコア UP
-//				player->score = player->score + 1;
-//				bullet->use = FALSE;
-//				bullet->pos = D3DXVECTOR3(player->pos.x, player->pos.y, 0.0f);
-//				//enemy->use = FALSE;
-//			}
-//		}
-//	}
-//}
-
 //=============================================================================
 // 画面遷移
 //=============================================================================
 void SetStage(int stage)
 {
 	//if( state < 0 || state >= STATE_MAX ) return;		
-	g_nStage = stage;	
-	StopSound(g_pBGM);
-	switch (g_nStage)
+	g_nStage = stage;		
+	if (!IsPlaying(LoadSound(stage))) 
 	{
-	case STAGE_TITLE:
-		g_pBGM = LoadSound(BGM_00);
-		break;
-	case STAGE_TUTOR:
-		SwitchBG(1);
-		g_pBGM = LoadSound(BGM_01);
-		break;
-	case STAGE_GAME:
-		g_pBGM = LoadSound(BGM_02);
-		SwitchBG(4);
-		GetPlayer(0)->gravity = 0;
-		GetPlayer(0)->view_mode = 0;
-		break;
-	case STAGE_GAME_END:
-		g_pBGM = LoadSound(BGM_03);
-		SwitchBG(5);
-		break;
-	case STAGE_RESULT:
-		g_pBGM = LoadSound(BGM_04);
-		SwitchBG(6);
-		break;
+		StopSound(g_pBGM);
+		g_pBGM->Release();
+		g_pBGM = NULL;
+		g_pBGM = LoadSound(stage);
+		PlaySound(g_pBGM, E_DS8_FLAG_NONE);
 	}
-	PlaySound(g_pBGM, E_DS8_FLAG_NONE);
 }
 //=============================================================================
 // 当たり判定処理
 //=============================================================================
 void CheckHit(void)
 {
+	PLAYER *player = GetPlayer(0);				// エネミーのポインターを初期化
 	ENEMY *enemy = GetEnemy(0);				// エネミーのポインターを初期化
 	BULLET *bullet = GetBullet(0);			// バレットのポインターを初期化
 	int cnt = 0;							// 敵の数を数える
@@ -592,13 +563,14 @@ void CheckHit(void)
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
 		if (enemy->use == false)	continue;
-		if (CheckHitBB(GetPlayer(0)->pos, enemy->pos, D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
+		if (CheckHitBB(player->pos, enemy->pos, D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
 		{
 			// 操作キャラクターは死に
-
+			player->use = false;
 			// 敵キャラクターは倒される
 			enemy->use = false;
 			// HP減少処理
+			player->status.HP -= 10;
 		}
 	}
 	// 弾と敵(BC)
@@ -609,11 +581,11 @@ void CheckHit(void)
 		for (int j = 0; j < ENEMY_MAX; j++, enemy++)
 		{
 			if (enemy->use == false) continue;
-			//if (CheckHitBC(bullet->pos, enemy->pos, TEXTURE_BULLET_SIZE_X, TEXTURE_ENEMY_SIZE_X))
-			if (CheckHitBB(bullet->pos, enemy->pos, D3DXVECTOR2(TEXTURE_BULLET_SIZE_X, TEXTURE_BULLET_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
+			if (CheckHitBC(bullet->pos, enemy->pos, TEXTURE_BULLET_SIZE_X, TEXTURE_ENEMY_SIZE_X))
+			//if (CheckHitBB(bullet->pos, enemy->pos, D3DXVECTOR2(TEXTURE_BULLET_SIZE_X, TEXTURE_BULLET_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
 			{
 				bullet->use = false;		// 弾の消滅処理を行い
-				enemy->status.HP--;			// HP = 10
+				enemy->status.HP--;			// 敵HP減少処理
 				if (enemy->status.HP < 1){
 					enemy->use = false;		// 敵は倒される					
 					AddScore(100);			// スコア計算					
@@ -622,7 +594,9 @@ void CheckHit(void)
 		}
 	}
 	// ボスと弾(BC)
+
 	// 自分と敵の弾(BC)
+
 	// 敵が全滅したら画面遷移
 	enemy = GetEnemy(0);					// エネミーのポインターを初期化
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
@@ -636,6 +610,7 @@ void CheckHit(void)
 	if (cnt == 0)
 	{
 		SetStage(STAGE_GAME_END);
+		SwitchBG(5);
 	}
 }
 
@@ -680,9 +655,12 @@ bool CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float radius1, float radius2
 //=============================================================================
 void InitGame(void)
 {
-	InitPlayer(1);		// プレイヤーの再初期化
-	InitEnemy(1);		// エネミーの再初期化
-	InitBullet(1);		// バレットの再初期化
-	InitScore(1);		// スコアの再初期化
 	InitBG(1);			// BGの再初期化
+	InitBullet(1);		// バレットの再初期化
+	InitEnemy(1);		// エネミーの再初期化
+	InitPlayer(1);		// プレイヤーの再初期化	
+	InitResult();	
+	InitScore(1);		// スコアの再初期化		
+	InitTitle();		// プレイヤーの再初期化	
+	page = 1;
 }

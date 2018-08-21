@@ -18,7 +18,6 @@ enum
 	BGM_02,
 	BGM_03,
 	BGM_04,
-	BGM_05,
 	SE_00
 };
 enum
