@@ -18,7 +18,8 @@ enum
 	BGM_02,
 	BGM_03,
 	BGM_04,
-	SE_00
+	SE_00,
+	SE_01
 };
 enum
 {	// Ä¶—pƒtƒ‰ƒO

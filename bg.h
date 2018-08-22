@@ -16,8 +16,8 @@
 #define TEXTURE_GAME_BG05		_T("data/BG/ice_castle.png")	// 背景画像
 #define TEXTURE_GAME_BG06		_T("data/BG/moon_red.png")		// 背景画像
 
-#define BG00_SIZE_X			(800)//800)	// テクスチャサイズ
-#define BG00_SIZE_Y			(600)//600)	// 同上
+#define BG00_SIZE_X			(800)	// テクスチャサイズ
+#define BG00_SIZE_Y			(600)	// 同上
 #define BG00_POS_X			(0)		// ポリゴンの初期位置X(左上)
 #define BG00_POS_Y			(0)		// 同上
 //*****************************************************************************

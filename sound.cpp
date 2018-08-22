@@ -20,7 +20,8 @@ const TCHAR* c_soundFilename[] = {
 	_T("data/BGM/cyber_battle.wav"),
 	_T("data/BGM/forest1.wav"),
 	_T("data/BGM/crystal3.wav"),
-	_T("data/SE/bomb000.wav")
+	_T("data/SE/bomb000.wav"),
+	_T("data/SE/summon1.wav")
 };
 
 // ƒOƒ[ƒoƒ‹•Ï”

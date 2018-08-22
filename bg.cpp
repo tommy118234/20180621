@@ -204,6 +204,6 @@ void ChangeBG(void)
 #undef  BG00_SIZE_X	
 #undef  BG00_SIZE_Y		
 
-#define  BG00_SIZE_X	(4000)	// テクスチャサイズ
-#define  BG00_SIZE_Y	(2500)	// 同上
+#define  BG00_SIZE_X	(1440)	// テクスチャサイズ
+#define  BG00_SIZE_Y	(1080)	// 同上
 }

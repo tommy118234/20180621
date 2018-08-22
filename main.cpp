@@ -13,6 +13,7 @@
 #include "title.h"
 #include "result.h"
 #include "score.h"
+#include "servant.h"
 #include "sound.h"
 #include <time.h>
 
@@ -314,6 +315,8 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	InitEnemy(0);
 	// バレットの初期化処理
 	InitBullet(0);
+	// SERVANTの初期化処理
+	InitSERVANT(0);
 	// BG初期化
 	InitBG(0);
 	// タイトル初期化
@@ -339,6 +342,8 @@ void Uninit(void)
 	UninitEnemy();
 	// バレットの終了処理
 	UninitBullet();
+	// SERVANTの終了処理
+	UninitSERVANT();
 	// BG終了処理
 	UninitBG();
 	// タイトル終了処理
@@ -425,6 +430,8 @@ void Update(void)
 		UpdatePlayer();
 		// バレットの更新処理
 		UpdateBullet();
+		// SERVANTの更新処理
+		UpdateSERVANT();
 		// スコアの更新処理
 		UpdateScore();
 		// 当たり判定
@@ -483,6 +490,8 @@ void Draw(void)
 			DrawPlayer();
 			// バレットの描画処理
 			DrawBullet();
+			// SERVANTの描画処理
+			DrawSERVANT();
 			// スコアの描画処理
 			DrawScore();
 			break;
@@ -524,6 +533,11 @@ void DrawDebugFont(void)
 	RECT rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 	TCHAR str[256];
 	PLAYER *player = GetPlayer(0);	
+
+	ENEMY *enemy = GetEnemy(0);
+
+	BULLET *bullet = GetBullet(0);
+	SERVANT *servant = GetSERVANT(0);
 	
 	// テキスト描画
 	sprintf(str, _T("FPS:%d"), g_nCountFPS);
@@ -531,6 +545,11 @@ void DrawDebugFont(void)
 
 	rect.top = 20;
 	sprintf(str, "PX:%f  PY:%f", player->pos.x, player->pos.y);
+	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
+
+
+	rect.top = 40;
+	sprintf(str, "A:%f B:%f C:%f D:%f", enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2, servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2, servant->rot.z, atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2, enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2));
 	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
 }
 #endif
@@ -581,8 +600,8 @@ void CheckHit(void)
 		for (int j = 0; j < ENEMY_MAX; j++, enemy++)
 		{
 			if (enemy->use == false) continue;
-			if (CheckHitBC(bullet->pos, enemy->pos, TEXTURE_BULLET_SIZE_X, TEXTURE_ENEMY_SIZE_X))
-			//if (CheckHitBB(bullet->pos, enemy->pos, D3DXVECTOR2(TEXTURE_BULLET_SIZE_X, TEXTURE_BULLET_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
+			//if (CheckHitBC(bullet->pos, enemy->pos, TEXTURE_BULLET_SIZE_X, TEXTURE_ENEMY_SIZE_X))
+			if (CheckHitBB(bullet->pos, enemy->pos, D3DXVECTOR2(TEXTURE_BULLET_SIZE_X, TEXTURE_BULLET_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
 			{
 				bullet->use = false;		// 弾の消滅処理を行い
 				enemy->status.HP--;			// 敵HP減少処理
@@ -657,6 +676,7 @@ void InitGame(void)
 {
 	InitBG(1);			// BGの再初期化
 	InitBullet(1);		// バレットの再初期化
+	InitSERVANT(1);		// バレットの再初期化
 	InitEnemy(1);		// エネミーの再初期化
 	InitPlayer(1);		// プレイヤーの再初期化	
 	InitResult();	

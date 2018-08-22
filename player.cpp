@@ -8,7 +8,11 @@
 #include "player.h"
 #include "input.h"
 #include "bullet.h"
+#include "servant.h"
 #include "sound.h"
+
+#define M_PI 3.14159265358979323846
+
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -68,6 +72,13 @@ HRESULT InitPlayer(int type)
 		player->view_mode = 1;
 		player->ready = 0;
 
+		player->status.HP = 500;								// HPを初期化
+		player->status.MP = 100;								// MPを初期化
+		player->status.ATK = 100;								// ATKを初期化
+		player->status.DEF = 100;								// DEFを初期化
+		player->status.LUCK = 100;								// LUCKを初期化
+		strcpy(player->status.name, "ヴァルキリー ?");			// NAMEを初期化
+
 		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y);
 		player->Radius = D3DXVec2Length(&temp);				// プレイヤーの半径を初期化
 		player->BaseAngle = atan2f(TEXTURE_PLAYER_SIZE_Y, TEXTURE_PLAYER_SIZE_X);	// プレイヤーの角度を初期化
@@ -76,10 +87,7 @@ HRESULT InitPlayer(int type)
 		MakeVertexPlayer(i);						// 頂点情報の作成
 
 	}
-
-
-	return S_OK;
-	
+	return S_OK;	
 }
 
 //=============================================================================
@@ -99,7 +107,6 @@ void UninitPlayer(void)
 //=============================================================================
 void UpdatePlayer(void)
 {			
-
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	PLAYER *player = &playerWk[0];	
 	if (player->view_mode == 0) {
@@ -122,8 +129,6 @@ void UpdatePlayer(void)
 	}
 	for (int i = 0; i < PLAYER_MAX; i++, player++)
 	{
-		
-		
 		//万有引力
 		if (!jump_cooldown && player->gravity > 0) {
 			player->pos.y += player->gravity + acceleration;
@@ -178,7 +183,8 @@ void UpdatePlayer(void)
 
 			// キーボード入力で移動
 			if (GetKeyboardPress(DIK_DOWN) && player->gravity == 0) {
-
+				if (player->gravity == 0)
+					moving_cooldown = 1;
 				player->pos.y += 5;
 			}
 			if (GetKeyboardPress(DIK_UP)) {
@@ -190,39 +196,63 @@ void UpdatePlayer(void)
 					}
 				}
 				else {
-					player->pos.y -= 5;
+					moving_cooldown = 1;
+					player->pos.x -= 5 * (-sinf(player->BaseAngle + player->rot.z) + cosf(player->BaseAngle + player->rot.z));
+					player->pos.y -= 5 * (cosf(player->BaseAngle + player->rot.z) + sinf(player->BaseAngle + player->rot.z));							
 				}
 			}
 			if (GetKeyboardPress(DIK_LEFT)) {
-				moving_cooldown = 1;
-				player->direction = -1;
-				player->pos.x -= 5;
+				if (player->gravity != 0) {
+					moving_cooldown = 1;
+					player->direction = -1;
+
+					player->pos.x -= 5;
+				}
+				else {
+					player->rot.z -= 0.1f;
+				}
 			}
 			if (GetKeyboardPress(DIK_RIGHT)) {
-				moving_cooldown = 1;
-				player->direction = 1;
-				player->pos.x += 5;
+				if (player->gravity != 0) {
+					moving_cooldown = 1;
+					player->direction = 1;
+
+					player->pos.x += 5;
+				}
+				else {
+					player->rot.z += 0.1f;
+				}
 			}
 
 			// 召喚
-			if (GetKeyboardPress(DIK_Q)) {
-
-				moving_cooldown = 1;
-				player->direction = 1;
-				player->pos.x += 5;
+			if (GetKeyboardPress(DIK_Q) && (bullet_cooldown == 0)) {
+				bullet_cooldown += 5;
+				player->status.MP -= 20;
+				D3DXVECTOR3 pos = player->pos;
+				pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				// pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
+				SetSERVANT(pos,1);
 
 			}
 			// 召喚
-			if (GetKeyboardPress(DIK_W)) {
-				moving_cooldown = 1;
-				player->direction = 1;
-				player->pos.x += 5;
+			if (GetKeyboardPress(DIK_W) && (bullet_cooldown == 0)) {
+				bullet_cooldown += 5;
+				player->status.MP -= 20;
+				D3DXVECTOR3 pos = player->pos;
+				//pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				pos.x -= player->pos.x / 4.0f;
+				SetSERVANT(pos,2);
 			}
 			// 召喚
-			if (GetKeyboardPress(DIK_E)) {
-				moving_cooldown = 1;
-				player->direction = 1;
-				player->pos.x += 5;
+			if (GetKeyboardPress(DIK_E) && (bullet_cooldown == 0)) {
+				bullet_cooldown += 5;
+				player->status.MP -= 20;
+				D3DXVECTOR3 pos = player->pos;
+				pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				// pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				pos.x -= player->pos.x / 4.0f;
+				SetSERVANT(pos, 3);
 			}
 			// スキル
 			if (GetKeyboardPress(DIK_A)) {
@@ -281,20 +311,20 @@ void UpdatePlayer(void)
 			{
 				player->pos.x -= 2.0f;
 			}
-
+			//弾発射
 			if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0))
 			{
 				bullet_cooldown += 5;
 				D3DXVECTOR3 pos = player->pos;
-				pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				SetBullet(pos);
+				//pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				SetBullet(pos,player->rot.z);
 			}
 			else if (IsButtonTriggered(0, BUTTON_B))
 			{
 				bullet_cooldown += 5;
 				D3DXVECTOR3 pos = player->pos;
-				pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				SetBullet(pos);
+				//pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				SetBullet(pos, player->rot.z);
 			}
 
 
@@ -303,8 +333,13 @@ void UpdatePlayer(void)
 			// 移動後の座標で頂点を設定
 			SetVertexPlayer(i, player->direction);
 			if (bullet_cooldown > 0)
-			bullet_cooldown --;
+			bullet_cooldown --;		
 			
+			if (player->rot.z > 2* M_PI)
+				player->rot.z = player->rot.z - 2 * M_PI;
+			
+			if (player->rot.z < - 2 *M_PI)
+				player->rot.z = -player->rot.z - 2 * M_PI;
 		}
 	}
 }
@@ -468,26 +503,26 @@ PLAYER *GetPlayer(int pno)
 }
 
 
-void Top_to_SideView(void)
+void Side_to_TopView(void)
 {
 
-#undef TEXTURE_GAME_PLAYER	_T	
+//#undef TEXTURE_GAME_PLAYER	_T	
 #undef TEXTURE_PLAYER_SIZE_X	
 #undef TEXTURE_PLAYER_SIZE_Y	
 #undef TEXTURE_PATTERN_DIVIDE_X	
 #undef TEXTURE_PATTERN_DIVIDE_Y	
 
 //#define TEXTURE_GAME_PLAYER	_T("data/TEXTURE/runningman000.png")	// サンプル用画像
-#define TEXTURE_PLAYER_SIZE_X	(100/2) // テクスチャサイズ
-#define TEXTURE_PLAYER_SIZE_Y	(200/2) // 同上 
+#define TEXTURE_PLAYER_SIZE_X	(545/5/2) // テクスチャサイズ
+#define TEXTURE_PLAYER_SIZE_Y	(242/2/2) // 同上 
 //#define TEXTURE_PATTERN_DIVIDE_X	(8)	// アニメパターンのテクスチャ内分割数（X)
 //#define TEXTURE_PATTERN_DIVIDE_Y	(1)	// アニメパターンのテクスチャ内分割数（Y)
 }
 
-void Side_to_TopView(void)
+void Top_to_SideView(void)
 {
 
-#undef TEXTURE_GAME_PLAYER	_T	
+//#undef TEXTURE_GAME_PLAYER	_T	
 #undef TEXTURE_PLAYER_SIZE_X	
 #undef TEXTURE_PLAYER_SIZE_Y	
 #undef TEXTURE_PATTERN_DIVIDE_X	

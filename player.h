@@ -11,24 +11,18 @@
 #define	NUM_PLAYER		(2)					// ポリゴン数
 
 #define TEXTURE_GAME_PLAYER	_T("data/TEXTURE/runningman001.png")	// サンプル用画像
-#define TEXTURE_PLAYER_SIZE_X	(140/5) // テクスチャサイズ
-#define TEXTURE_PLAYER_SIZE_Y	(200/5) // 同上 
+#define TEXTURE_GAME_PLAYER2	_T("data/TEXTURE/player1.png")	// サンプル用画像
+#define TEXTURE_PLAYER_SIZE_X	(140/5)//545/5) // テクスチャサイズ
+#define TEXTURE_PLAYER_SIZE_Y	(200/5)//242/2) // 同上 
 
 #define TEXTURE_PATTERN_DIVIDE_X	(5)	// アニメパターンのテクスチャ内分割数（X)
 #define TEXTURE_PATTERN_DIVIDE_Y	(2)	// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
 
-
-#define TEXTURE_GAME_PLAYER2	_T("data/TEXTURE/runningman000.png")	// サンプル用画像
-#define TEXTURE_PLAYER_SIZE_X2	(100/2) // テクスチャサイズ
-#define TEXTURE_PLAYER_SIZE_Y2	(200/2) // 同上 
-#define TEXTURE_PATTERN_DIVIDE_X2	(8)	// アニメパターンのテクスチャ内分割数（X)
-#define TEXTURE_PATTERN_DIVIDE_Y2	(1)	// アニメパターンのテクスチャ内分割数（Y)
-
-#define TEXTURE_GAME_SERVANT	_T("data/TEXTURE/bullet.png")	// サンプル用画像
-#define TEXTURE_SERVANT_SIZE_X			(20/2)		// テクスチャサイズ
-#define TEXTURE_SERVANT_SIZE_Y			(60/2)		// 同上
-
+//#define TEXTURE_PLAYER_SIZE_X2	(100/2) // テクスチャサイズ
+//#define TEXTURE_PLAYER_SIZE_Y2	(200/2) // 同上 
+//#define TEXTURE_PATTERN_DIVIDE_X2	(8)	// アニメパターンのテクスチャ内分割数（X)
+//#define TEXTURE_PATTERN_DIVIDE_Y2	(1)	// アニメパターンのテクスチャ内分割数（Y)
 
 #define TIME_ANIMATION				(4)	// アニメーションの切り替わるカウント
 

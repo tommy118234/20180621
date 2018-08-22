@@ -55,11 +55,19 @@ HRESULT InitEnemy(int type)
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
 		enemy->use = true;										// 使用
-		enemy->pos = D3DXVECTOR3(SCREEN_CENTER_X, TEXTURE_ENEMY_SIZE_Y/2, 0.0f);	 // 座標データを初期化	
+		enemy->pos = D3DXVECTOR3(BG00_SIZE_X/2, TEXTURE_ENEMY_SIZE_Y/2, 0.0f);	 // 座標データを初期化	
 		enemy->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);				// 回転データを初期化
 		enemy->CountAnim = 0;									// アニメパターン番号をランダムで初期化
 		enemy->PatternAnim = 0;									// アニメカウントを初期化
-		enemy->status.HP = 5;									// HPを初期化
+
+
+		enemy->status.HP = 5000;								// HPを初期化
+		enemy->status.MP= 100;									// MPを初期化
+		enemy->status.ATK = 300;								// ATKを初期化
+		enemy->status.DEF = 50;								// DEFを初期化
+		enemy->status.LUCK = 100;								// LUCKを初期化
+		strcpy(enemy->status.name,"亡霊の形 ?");				// NAMEを初期化
+
 
 		//enemy Base Angle, Radius
 		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X / 2, TEXTURE_ENEMY_SIZE_Y / 2);
@@ -100,15 +108,6 @@ void UpdateEnemy(void)
 			enemy->PatternAnim = (enemy->PatternAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
 
 
-			//if (GetKeyboardPress(DIK_LEFT)) {
-			//	
-			//	enemy->pos.x += 2.5;
-			//}
-			//if (GetKeyboardPress(DIK_RIGHT)) {
-			//	
-			//	enemy->pos.x -= 2.5;
-			//}
-
 			if (enemy->pos.x < 0)
 			{
 				enemy->pos.x = 0;
@@ -125,17 +124,20 @@ void UpdateEnemy(void)
 			{
 				enemy->pos.y = SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y;
 			}
-			// スクロール処理
-			//if (GetKeyboardPress(DIK_LEFT)) {
-			//
-			//	enemy->pos.x += 5;
-			//}
-			//if (GetKeyboardPress(DIK_RIGHT)) {
-			//	enemy->pos.x -= 5;
-			//}
+			if (GetKeyboardPress(DIK_UP) )
+			{
+				if (GetPlayer(0)->pos.x > BG00_SIZE_X / 2 && enemy->rot.z != -GetPlayer(0)->rot.z && enemy->rot.z > -1.57 )
+					enemy->rot.z -= 0.1;
+				if (GetPlayer(0)->pos.x < BG00_SIZE_X / 2 && enemy->rot.z != -GetPlayer(0)->rot.z&& enemy->rot.z < 1.57)
+					enemy->rot.z += 0.1;
 
-			//enemy->rot.z -= 0.1
-			//enemy->pos = D3DXVECTOR3(BG00_SIZE_X - TEXTURE_ENEMY_SIZE_X/2,  0, 0.0f);	 // 座標データを初期化	
+			}
+			if (enemy->rot.z > 2 *3.14)
+				enemy->rot.z = enemy->rot.z - 2 * 3.14;
+
+			if (enemy->rot.z < -2 * 3.14)
+				enemy->rot.z = -enemy->rot.z - 2 * 3.14;
+
 			SetVertexEnemy(i);
 		}
 	}
@@ -203,19 +205,19 @@ void SetVertexEnemy(int no)
 	ENEMY *enemy = &enemyWk[no];			// エネミーのポインターを初期化
 	
 	// 頂点座標の設定
-	enemy->vertexWk[0].vtx.x = enemy->pos.x - cosf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[0].vtx.x = enemy->pos.x - cosf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius - GetPlayer(0)->pos.x / 4.0f;
 	enemy->vertexWk[0].vtx.y = enemy->pos.y - sinf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
 	enemy->vertexWk[0].vtx.z = 0.0f;
 
-	enemy->vertexWk[1].vtx.x = enemy->pos.x + cosf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[1].vtx.x = enemy->pos.x + cosf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius - GetPlayer(0)->pos.x / 4.0f;
 	enemy->vertexWk[1].vtx.y = enemy->pos.y - sinf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
 	enemy->vertexWk[1].vtx.z = 0.0f;
 
-	enemy->vertexWk[2].vtx.x = enemy->pos.x - cosf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[2].vtx.x = enemy->pos.x - cosf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius - GetPlayer(0)->pos.x / 4.0f;
 	enemy->vertexWk[2].vtx.y = enemy->pos.y + sinf(enemy->BaseAngle - enemy->rot.z) * enemy->Radius;
 	enemy->vertexWk[2].vtx.z = 0.0f;
 
-	enemy->vertexWk[3].vtx.x = enemy->pos.x + cosf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
+	enemy->vertexWk[3].vtx.x = enemy->pos.x + cosf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius - GetPlayer(0)->pos.x / 4.0f;
 	enemy->vertexWk[3].vtx.y = enemy->pos.y + sinf(enemy->BaseAngle + enemy->rot.z) * enemy->Radius;
 	enemy->vertexWk[3].vtx.z = 0.0f;
 }
