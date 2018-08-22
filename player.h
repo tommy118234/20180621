@@ -19,11 +19,6 @@
 #define TEXTURE_PATTERN_DIVIDE_Y	(2)	// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
 
-//#define TEXTURE_PLAYER_SIZE_X2	(100/2) // テクスチャサイズ
-//#define TEXTURE_PLAYER_SIZE_Y2	(200/2) // 同上 
-//#define TEXTURE_PATTERN_DIVIDE_X2	(8)	// アニメパターンのテクスチャ内分割数（X)
-//#define TEXTURE_PATTERN_DIVIDE_Y2	(1)	// アニメパターンのテクスチャ内分割数（Y)
-
 #define TIME_ANIMATION				(4)	// アニメーションの切り替わるカウント
 
 #define PLAYER_MAX					(1) // プレイヤーの最大数

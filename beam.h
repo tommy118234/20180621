@@ -4,56 +4,56 @@
 * 作成者:		GP11B 16　徐　ワイ延
 * 作成開始日:	2018/07/24
 ********************************************************************************/
-#ifndef _BULLET_H_
-#define _BULLET_H_
+#ifndef _BEAM_H_
+#define _BEAM_H_
 
 
 // マクロ定義
-#define	NUM_BULLET						(2)			// ポリゴン数
+#define	NUM_BEAM						(2)			// ポリゴン数
 
-#define TEXTURE_GAME_BULLET				_T("data/TEXTURE/bullet.png")	// サンプル用画像
-#define TEXTURE_BULLET_SIZE_X			(20)		// テクスチャサイズ
-#define TEXTURE_BULLET_SIZE_Y			(20)		// 同上
+#define TEXTURE_GAME_BEAM				_T("data/TEXTURE/beam.png")	// サンプル用画像
+#define TEXTURE_BEAM_SIZE_X			(20)		// テクスチャサイズ
+#define TEXTURE_BEAM_SIZE_Y			(60)		// 同上
 
-#define TEXTURE_PATTERN_DIVIDE_X_BULLET	(1)			// アニメパターンのテクスチャ内分割数（X)											// アニメパターンのテクスチャ内分割数（X)
-#define TEXTURE_PATTERN_DIVIDE_Y_BULLET	(1)			// アニメパターンのテクスチャ内分割数（Y)											// アニメパターンのテクスチャ内分割数（Y)
-#define ANIM_PATTERN_NUM_BULLET			(TEXTURE_PATTERN_DIVIDE_X_BULLET*TEXTURE_PATTERN_DIVIDE_Y_BULLET)	// アニメーションパターン数
-#define TIME_ANIMATION_BULLET			(50)			// アニメーションの切り替わるカウント
+#define TEXTURE_PATTERN_DIVIDE_X_BEAM	(1)			// アニメパターンのテクスチャ内分割数（X)											// アニメパターンのテクスチャ内分割数（X)
+#define TEXTURE_PATTERN_DIVIDE_Y_BEAM	(1)			// アニメパターンのテクスチャ内分割数（Y)											// アニメパターンのテクスチャ内分割数（Y)
+#define ANIM_PATTERN_NUM_BEAM			(TEXTURE_PATTERN_DIVIDE_X_BEAM*TEXTURE_PATTERN_DIVIDE_Y_BEAM)	// アニメーションパターン数
+#define TIME_ANIMATION_BEAM			(50)			// アニメーションの切り替わるカウント
 
-#define BULLET_MAX						(50)			// バレットの最大数
+#define BEAM_MAX						(50)			// バレットの最大数
 
-#define BULLET_SPEED					(6.0f)		// バレットの移動スピード
+#define BEAM_SPEED					(6.0f)		// バレットの移動スピード
 
 /*******************************************************************************
 * 構造体定義
 ********************************************************************************/
 
 typedef struct					// バレットの構造体
-{	
+{
 	bool					use;						// true:使用  false:未使用
 	D3DXVECTOR3				pos;								// ポリゴンの移動量
 	D3DXVECTOR3				rot;								// ポリゴンの回転量
 	int						PatternAnim;						// アニメーションパターンナンバー
 	int						CountAnim;							// アニメーションカウント
-	
+
 	LPDIRECT3DTEXTURE9		Texture;							// テクスチャへのポリゴン
 	VERTEX_2D				vertexWk[NUM_VERTEX];				// 頂点情報格納ワーク
-	
+
 	float					Radius;					// ポリゴンの半径
 	float					BaseAngle = 0.0;		// ポリゴンの角度
 	int						direction = 1;
 
-} BULLET;
+} BEAM;
 
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitBullet(int type);
-void UninitBullet(void);
-void UpdateBullet(void);
-void DrawBullet(void);
-void SetBullet(D3DXVECTOR3 pos, float rot);
-BULLET *GetBullet(int pno);	// プレイヤーの(アドレス)を取得
+HRESULT InitBeam(int type);
+void UninitBeam(void);
+void UpdateBeam(void);
+void DrawBeam(void);
+void SetBeam(D3DXVECTOR3 pos, float rot);
+BEAM *GetBeam(int pno);	// プレイヤーの(アドレス)を取得
 
 
 #endif

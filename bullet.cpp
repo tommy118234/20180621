@@ -108,10 +108,10 @@ void UpdateBullet(void)
 			if (bullet->pos.y < -TEXTURE_BULLET_SIZE_Y || bullet->pos.y > SCREEN_HEIGHT
 				|| bullet->pos.x < -TEXTURE_BULLET_SIZE_X || bullet->pos.x > SCREEN_WIDTH)
 			{
-
-				bullet->Texture = NULL;					// テクスチャ情報
-				bullet->Texture = g_pD3DTextureBullet;	// テクスチャ情報				
-				bullet->pos.x = -100.0f;
+				bullet->use = false;
+				//bullet->Texture = NULL;					// テクスチャ情報
+				//bullet->Texture = g_pD3DTextureBullet;	// テクスチャ情報				
+				//bullet->pos.x = -100.0f;
 				//bullet->pos = D3DXVECTOR3(player->pos.x + TEXTURE_BULLET_SIZE_X / 2, player->pos.y, 0.0f);
 			}
 			SetVertexBullet(i);
@@ -190,20 +190,20 @@ void SetVertexBullet(int no)
 										  0);
 
 	bullet->vertexWk[0].vtx = D3DXVECTOR3(bullet->pos.x - cosf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
-		bullet->pos.y - sinf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
-		0);
+										  bullet->pos.y - sinf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
+										  0);
 
 	bullet->vertexWk[1].vtx = D3DXVECTOR3(bullet->pos.x + cosf(bullet->BaseAngle - bullet->rot.z) * bullet->Radius,
-		bullet->pos.y - sinf(bullet->BaseAngle - bullet->rot.z) *bullet->Radius,
-		0);
-
+										  bullet->pos.y - sinf(bullet->BaseAngle - bullet->rot.z) *bullet->Radius,
+										  0);
+																	
 	bullet->vertexWk[2].vtx = D3DXVECTOR3(bullet->pos.x - cosf(bullet->BaseAngle - bullet->rot.z) * bullet->Radius,
-		bullet->pos.y + sinf(bullet->BaseAngle - bullet->rot.z) * bullet->Radius,
-		0);
+										  bullet->pos.y + sinf(bullet->BaseAngle - bullet->rot.z) * bullet->Radius,
+									      0);
 
 	bullet->vertexWk[3].vtx = D3DXVECTOR3(bullet->pos.x + cosf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
-		bullet->pos.y + sinf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
-		0);
+										  bullet->pos.y + sinf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
+										  0);
 }
 //=============================================================================
 // テクスチャ座標の設定

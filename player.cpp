@@ -223,75 +223,63 @@ void UpdatePlayer(void)
 					player->rot.z += 0.1f;
 				}
 			}
+			if (player->status.MP > 20) {
+				// 召喚
+				if (GetKeyboardPress(DIK_Q) && (bullet_cooldown == 0)) {
+					bullet_cooldown += 5;
+					player->status.MP -= 20;
+					D3DXVECTOR3 pos = player->pos;
+					pos.y -= TEXTURE_PLAYER_SIZE_Y;
+					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
+					SetSERVANT(pos, 1);
 
-			// 召喚
-			if (GetKeyboardPress(DIK_Q) && (bullet_cooldown == 0)) {
-				bullet_cooldown += 5;
-				player->status.MP -= 20;
-				D3DXVECTOR3 pos = player->pos;
-				pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				// pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
-				SetSERVANT(pos,1);
-
+				}
+				// 召喚
+				if (GetKeyboardPress(DIK_W) && (bullet_cooldown == 0)) {
+					bullet_cooldown += 5;
+					player->status.MP -= 20;
+					D3DXVECTOR3 pos = player->pos;
+					pos.y -= TEXTURE_PLAYER_SIZE_Y;
+					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
+					SetSERVANT(pos, 2);
+				}
+				// 召喚
+				if (GetKeyboardPress(DIK_E) && (bullet_cooldown == 0)) {
+					bullet_cooldown += 5;
+					player->status.MP -= 20;
+					D3DXVECTOR3 pos = player->pos;
+					pos.y -= TEXTURE_PLAYER_SIZE_Y;
+					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
+					SetSERVANT(pos, 3);
+				}
+				// スキル
+				if (GetKeyboardPress(DIK_A)) {
+					player->status.ATK += 50;
+					player->status.MP -= 20;
+				}
+				// スキル
+				if (GetKeyboardPress(DIK_S)) {
+					player->status.DEF += 50;
+					player->status.MP -= 20;
+				}
+				// スキル
+				if (GetKeyboardPress(DIK_D)) {
+					player->status.ATK += 100;
+					player->status.DEF += 100;
+					player->status.HP -= 20;
+				}
 			}
-			// 召喚
-			if (GetKeyboardPress(DIK_W) && (bullet_cooldown == 0)) {
-				bullet_cooldown += 5;
-				player->status.MP -= 20;
-				D3DXVECTOR3 pos = player->pos;
-				//pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				pos.x -= player->pos.x / 4.0f;
-				SetSERVANT(pos,2);
-			}
-			// 召喚
-			if (GetKeyboardPress(DIK_E) && (bullet_cooldown == 0)) {
-				bullet_cooldown += 5;
-				player->status.MP -= 20;
-				D3DXVECTOR3 pos = player->pos;
-				pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				// pos.y -= TEXTURE_PLAYER_SIZE_Y;
-				pos.x -= player->pos.x / 4.0f;
-				SetSERVANT(pos, 3);
-			}
-			// スキル
-			if (GetKeyboardPress(DIK_A)) {
-				player->status.ATK += 50;
-				player->status.MP -= 20;
-			}
-			// スキル
-			if (GetKeyboardPress(DIK_S)) {
-				player->status.DEF += 50;
-				player->status.MP -= 20;
-			}
-			// スキル
-			if (GetKeyboardPress(DIK_D)) {
-				player->status.ATK += 100;
-				player->status.DEF += 100;
-				player->status.HP -= 20;
-			}
-
-			// 回転
-			if (GetKeyboardPress(DIK_T))
+			// 攻撃モードスウィッチ
+			if (GetKeyboardPress(DIK_F))
 			{
-				player->rot.z += 0.1f;
+				//player->rot.z += 0.1f;
+				player->direction = 1;
 			}
-			if (GetKeyboardPress(DIK_R))
+			if (GetKeyboardPress(DIK_G))
 			{
-				player->rot.z -= 0.1f;
+				//player->rot.z -= 0.1f;
+				player->direction = -1;
 			}
-			// 拡大縮小
-			//if (GetKeyboardPress(DIK_F))
-			//{
-			//	player->Radius -= 1.0f;
-			//}
-			//else if (GetKeyboardPress(DIK_T))
-			//{
-			//	player->Radius += 1.0f;
-			//}
-
-
-
 
 			// ゲームパッドでで移動処理
 			if (IsButtonPressed(0, BUTTON_DOWN))
@@ -312,23 +300,19 @@ void UpdatePlayer(void)
 				player->pos.x -= 2.0f;
 			}
 			//弾発射
-			if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0))
+			if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0) && player->direction == 1)
 			{
 				bullet_cooldown += 5;
 				D3DXVECTOR3 pos = player->pos;
-				//pos.y -= TEXTURE_PLAYER_SIZE_Y;
 				SetBullet(pos,player->rot.z);
 			}
 			else if (IsButtonTriggered(0, BUTTON_B))
 			{
 				bullet_cooldown += 5;
 				D3DXVECTOR3 pos = player->pos;
-				//pos.y -= TEXTURE_PLAYER_SIZE_Y;
 				SetBullet(pos, player->rot.z);
 			}
-
-
-
+					   
 
 			// 移動後の座標で頂点を設定
 			SetVertexPlayer(i, player->direction);

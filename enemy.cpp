@@ -12,6 +12,8 @@
 #include "math.h"
 #include "bg.h"
 
+#include "beam.h"
+
 
 //*****************************************************************************
 // マクロ定義
@@ -30,6 +32,7 @@ void SetTextureEnemy(int no, int cntPattern );	//
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTextureEnemy = NULL;		// テクスチャへのポリゴン		
 ENEMY					enemyWk[ENEMY_MAX];				// 頂点情報格納ワーク
+int beam_cooldown = 0;
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -98,6 +101,7 @@ void UninitEnemy(void)
 void UpdateEnemy(void)
 {
 	ENEMY *enemy = enemyWk;				// エネミーのポインターを初期化
+	PLAYER *player = GetPlayer(0);					// プレイヤー０番のアドレスを取得する
 
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
 	{
@@ -106,7 +110,6 @@ void UpdateEnemy(void)
 			// アニメーション
 			enemy->CountAnim = (enemy->CountAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
 			enemy->PatternAnim = (enemy->PatternAnim + 1) % ANIM_PATTERN_NUM_ENEMY;
-
 
 			if (enemy->pos.x < 0)
 			{
@@ -124,20 +127,31 @@ void UpdateEnemy(void)
 			{
 				enemy->pos.y = SCREEN_HEIGHT - TEXTURE_ENEMY_SIZE_Y;
 			}
-			if (GetKeyboardPress(DIK_UP) )
-			{
-				if (GetPlayer(0)->pos.x > BG00_SIZE_X / 2 && enemy->rot.z != -GetPlayer(0)->rot.z && enemy->rot.z > -1.57 )
-					enemy->rot.z -= 0.1;
-				if (GetPlayer(0)->pos.x < BG00_SIZE_X / 2 && enemy->rot.z != -GetPlayer(0)->rot.z&& enemy->rot.z < 1.57)
-					enemy->rot.z += 0.1;
+			
+			if (player->pos.x + TEXTURE_PLAYER_SIZE_X / 2 > BG00_SIZE_X / 2 && enemy->rot.z >-( 1.57 - atan2f(player->pos.y + TEXTURE_PLAYER_SIZE_Y / 2, player->pos.x - BG00_SIZE_X / 2)))
+				enemy->rot.z -= 0.02;
+			if (player->pos.x + TEXTURE_ENEMY_SIZE_X / 2 < BG00_SIZE_X / 2 && enemy->rot.z < 1.57 - atan2f(player->pos.y + TEXTURE_PLAYER_SIZE_Y / 2, BG00_SIZE_X / 2 - player->pos.x))
+				enemy->rot.z += 0.02;
 
-			}
-			if (enemy->rot.z > 2 *3.14)
-				enemy->rot.z = enemy->rot.z - 2 * 3.14;
-
-			if (enemy->rot.z < -2 * 3.14)
-				enemy->rot.z = -enemy->rot.z - 2 * 3.14;
-
+			if (enemy->status.HP < 4500) {
+				if (beam_cooldown == 0) 
+				{
+					BEAM *beam = GetBeam(0);		// エネミーのポインターを初期化
+					D3DXVECTOR3 pos = enemy->pos;
+					//pos.y += TEXTURE_ENEMY_SIZE_Y/2;				
+					//pos.x += TEXTURE_ENEMY_SIZE_X/2;
+					pos.x -= GetPlayer(0)->pos.x / 4.0f;	
+					// Hard Mode
+					//for (int i = 0; i < 50; i++) {
+					//	pos.x -= i * (sinf(beam->BaseAngle + beam->rot.z) - cosf(beam->BaseAngle + beam->rot.z));
+					//	pos.y += i * (cosf(beam->BaseAngle + beam->rot.z) + sinf(beam->BaseAngle + beam->rot.z));
+					//	SetBeam(pos, enemy->rot.z);
+					//}
+					SetBeam(pos, enemy->rot.z);
+					beam_cooldown = 50;
+				}
+				beam_cooldown--;
+			}			
 			SetVertexEnemy(i);
 		}
 	}

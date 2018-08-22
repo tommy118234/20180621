@@ -13,11 +13,11 @@
 #define	NUM_ENEMY					(2)			// ポリゴン数
 
 #define TEXTURE_GAME_ENEMY			_T("data/TEXTURE/boss1.png")	// サンプル用画像
-#define TEXTURE_ENEMY_SIZE_X		(545/5)//140)		// テクスチャサイズ
-#define TEXTURE_ENEMY_SIZE_Y		(242/2) //200)		// 同上
+#define TEXTURE_ENEMY_SIZE_X		(136)//140)		// テクスチャサイズ
+#define TEXTURE_ENEMY_SIZE_Y		(141) //200)		// 同上
 
-#define TEXTURE_PATTERN_DIVIDE_X_ENEMY	(5)		// アニメパターンのテクスチャ内分割数（X)
-#define TEXTURE_PATTERN_DIVIDE_Y_ENEMY	(2)		// アニメパターンのテクスチャ内分割数（Y)
+#define TEXTURE_PATTERN_DIVIDE_X_ENEMY	(3)		// アニメパターンのテクスチャ内分割数（X)
+#define TEXTURE_PATTERN_DIVIDE_Y_ENEMY	(1)		// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM_ENEMY			(TEXTURE_PATTERN_DIVIDE_X_ENEMY*TEXTURE_PATTERN_DIVIDE_Y_ENEMY)	// アニメーションパターン数
 #define TIME_ANIMATION_ENEMY			(50)	// アニメーションの切り替わるカウント
 
@@ -40,7 +40,7 @@ typedef struct					// エネミー構造体
 	VERTEX_2D				vertexWk[NUM_VERTEX];			// 頂点情報格納ワーク
 
 	float					Radius;					// ポリゴンの半径
-	float					BaseAngle = 0.2;		// ポリゴンの角度
+	float					BaseAngle = 0.0;		// ポリゴンの角度
 
 } ENEMY;
 

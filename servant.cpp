@@ -105,17 +105,12 @@ void UpdateSERVANT(void)
 			//// SERVANT‚ÌˆÚ“®ˆ—
 
 			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 > SERVANT->pos.x + TEXTURE_SERVANT_SIZE_X / 2 &&  SERVANT->rot.z < 1.57 - atan2f(SERVANT->pos.y + TEXTURE_SERVANT_SIZE_Y / 2, BG00_SIZE_X/2 - SERVANT->pos.x ))
-				SERVANT->rot.z += 0.1;
-			//else
-			//	SERVANT->rot.z = 1.57 - atan2f(SERVANT->pos.y - TEXTURE_SERVANT_SIZE_Y / 2, enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2);
-			
+				SERVANT->rot.z += 0.1;			
 			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 < SERVANT->pos.x + TEXTURE_SERVANT_SIZE_X / 2 && SERVANT->rot.z > -(1.57 - atan2f(SERVANT->pos.y + TEXTURE_SERVANT_SIZE_Y / 2,SERVANT->pos.x -  BG00_SIZE_X/2 )))
-				SERVANT->rot.z -= 0.1;
-			//else
-			//	SERVANT->rot.z = 1.57 - atan2f(SERVANT->pos.y - TEXTURE_SERVANT_SIZE_Y / 2, enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2);
+				SERVANT->rot.z -= 0.1;			
 			
 			if (SERVANT->bullet_cooldown < 1) {				
-				SERVANT->bullet_cooldown = 200;
+				SERVANT->bullet_cooldown = 20;
 				D3DXVECTOR3 pos = SERVANT->pos;
 				//pos.y -= TEXTURE_SERVANT_SIZE_Y;				
 				pos.x -= GetPlayer(0)->pos.x / 4.0f;
