@@ -32,6 +32,7 @@ LPDIRECTSOUNDBUFFER8	g_pSE2;							// SE用バッファ
 
 int bullet_cooldown = 0;
 int moving_cooldown = 0;
+int skill_cooldown = 0;
 int acceleration = 0;
 bool jump_cooldown = FALSE;
 
@@ -53,7 +54,8 @@ HRESULT InitPlayer(int type)
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,			// デバイスのポインタ
 			TEXTURE_GAME_PLAYER,					// ファイルの名前
-			&g_pD3DTexturePlayer);		//g_pSE2 = LoadSound(SE_00);		
+			&g_pD3DTexturePlayer);		
+		g_pSE2 = LoadSound(SE_00);		
 	}
 		
 	else if (type == 1) {
@@ -73,7 +75,7 @@ HRESULT InitPlayer(int type)
 		player->ready = 0;
 
 		player->status.HP = 500;								// HPを初期化
-		player->status.MP = 100;								// MPを初期化
+		player->status.MP = 200;								// MPを初期化
 		player->status.ATK = 100;								// ATKを初期化
 		player->status.DEF = 100;								// DEFを初期化
 		player->status.LUCK = 100;								// LUCKを初期化
@@ -125,6 +127,7 @@ void UpdatePlayer(void)
 			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
 		Top_to_SideView();
 		player->Texture = g_pD3DTexturePlayer;	// テクスチャ情報
+		player->pos = D3DXVECTOR3(SCREEN_WIDTH / 2 - TEXTURE_PLAYER_SIZE_X / 2, SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y, 0.0f);
 		player->view_mode = 2;
 	}
 	for (int i = 0; i < PLAYER_MAX; i++, player++)
@@ -205,7 +208,6 @@ void UpdatePlayer(void)
 				if (player->gravity != 0) {
 					moving_cooldown = 1;
 					player->direction = -1;
-
 					player->pos.x -= 5;
 				}
 				else {
@@ -223,8 +225,10 @@ void UpdatePlayer(void)
 					player->rot.z += 0.1f;
 				}
 			}
-			if (player->status.MP > 20) {
-				// 召喚
+			// MP消費
+			if (player->status.MP > 20 && player->direction == -1) {
+				
+				// 召喚 1
 				if (GetKeyboardPress(DIK_Q) && (bullet_cooldown == 0)) {
 					bullet_cooldown += 5;
 					player->status.MP -= 20;
@@ -232,9 +236,8 @@ void UpdatePlayer(void)
 					pos.y -= TEXTURE_PLAYER_SIZE_Y;
 					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
 					SetSERVANT(pos, 1);
-
 				}
-				// 召喚
+				// 召喚 2
 				if (GetKeyboardPress(DIK_W) && (bullet_cooldown == 0)) {
 					bullet_cooldown += 5;
 					player->status.MP -= 20;
@@ -243,7 +246,7 @@ void UpdatePlayer(void)
 					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
 					SetSERVANT(pos, 2);
 				}
-				// 召喚
+				// 召喚 3
 				if (GetKeyboardPress(DIK_E) && (bullet_cooldown == 0)) {
 					bullet_cooldown += 5;
 					player->status.MP -= 20;
@@ -252,78 +255,111 @@ void UpdatePlayer(void)
 					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
 					SetSERVANT(pos, 3);
 				}
-				// スキル
+				// スキル 1
 				if (GetKeyboardPress(DIK_A)) {
+					g_pSE2 = LoadSound(16);
+					// 発射音再生
+					if (IsPlaying(g_pSE2))
+						g_pSE2->SetCurrentPosition(0);
+					else {
+						PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+					}
 					player->status.ATK += 50;
 					player->status.MP -= 20;
 				}
-				// スキル
+				// スキル 2
 				if (GetKeyboardPress(DIK_S)) {
+					g_pSE2 = LoadSound(17);
+					// 発射音再生
+					if (IsPlaying(g_pSE2))
+						g_pSE2->SetCurrentPosition(0);
+					else {
+						PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+					}
 					player->status.DEF += 50;
 					player->status.MP -= 20;
 				}
-				// スキル
-				if (GetKeyboardPress(DIK_D)) {
-					player->status.ATK += 100;
-					player->status.DEF += 100;
-					player->status.HP -= 20;
+				
+			}
+			// スキル 3
+			if (GetKeyboardPress(DIK_D)) {
+				g_pSE2 = LoadSound(18);
+				// 発射音再生
+				if (IsPlaying(g_pSE2))
+					g_pSE2->SetCurrentPosition(0);
+				else {
+					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
 				}
+				player->status.HP -= 50;
+				player->status.MP += 50;
 			}
 			// 攻撃モードスウィッチ
 			if (GetKeyboardPress(DIK_F))
 			{
-				//player->rot.z += 0.1f;
+				// 攻撃モードスウィッチ音再生
+				g_pSE2 = LoadSound(14);
+				
+				if (IsPlaying(g_pSE2))
+					g_pSE2->SetCurrentPosition(0);
+				else {
+					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+				}
 				player->direction = 1;
 			}
 			if (GetKeyboardPress(DIK_G))
 			{
-				//player->rot.z -= 0.1f;
+				// 攻撃モードスウィッチ音再生
+				g_pSE2 = LoadSound(14);
+				if (IsPlaying(g_pSE2))
+					g_pSE2->SetCurrentPosition(0);
+				else {
+					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+				}
 				player->direction = -1;
 			}
-
 			// ゲームパッドでで移動処理
-			if (IsButtonPressed(0, BUTTON_DOWN))
-			{
-				player->pos.y += 2.0f;
-			}
-			else if (IsButtonPressed(0, BUTTON_UP))
-			{
-				player->pos.y -= 2.0f;
-			}
+			//if (IsButtonPressed(0, BUTTON_DOWN))
+			//{
+			//	player->pos.y += 2.0f;
+			//}
+			//else if (IsButtonPressed(0, BUTTON_UP))
+			//{
+			//	player->pos.y -= 2.0f;
+			//}
+			//
+			//if (IsButtonPressed(0, BUTTON_RIGHT))
+			//{
+			//	player->pos.x += 2.0f;
+			//}
+			//else if (IsButtonPressed(0, BUTTON_LEFT))
+			//{
+			//	player->pos.x -= 2.0f;
+			//}
 
-			if (IsButtonPressed(0, BUTTON_RIGHT))
-			{
-				player->pos.x += 2.0f;
-			}
-			else if (IsButtonPressed(0, BUTTON_LEFT))
-			{
-				player->pos.x -= 2.0f;
-			}
 			//弾発射
 			if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0) && player->direction == 1)
 			{
 				bullet_cooldown += 5;
 				D3DXVECTOR3 pos = player->pos;
-				SetBullet(pos,player->rot.z);
+				SetBullet(pos, player->rot.z, player->status.ATK);
 			}
-			else if (IsButtonTriggered(0, BUTTON_B))
-			{
-				bullet_cooldown += 5;
-				D3DXVECTOR3 pos = player->pos;
-				SetBullet(pos, player->rot.z);
-			}
-					   
+			//else if (IsButtonTriggered(0, BUTTON_B))
+			//{
+			//	bullet_cooldown += 5;
+			//	D3DXVECTOR3 pos = player->pos;
+			//	SetBullet(pos, player->rot.z, player->status.ATK);
+			//}
 
 			// 移動後の座標で頂点を設定
 			SetVertexPlayer(i, player->direction);
 			if (bullet_cooldown > 0)
-			bullet_cooldown --;		
-			
-			if (player->rot.z > 2* M_PI)
-				player->rot.z = player->rot.z - 2 * M_PI;
-			
-			if (player->rot.z < - 2 *M_PI)
-				player->rot.z = -player->rot.z - 2 * M_PI;
+				bullet_cooldown--;
+
+			//if (player->rot.z > 2 * M_PI)
+			//	player->rot.z = player->rot.z - 2 * M_PI;
+			//
+			//if (player->rot.z < -2 * M_PI)
+			//	player->rot.z = -player->rot.z - 2 * M_PI;
 		}
 	}
 }

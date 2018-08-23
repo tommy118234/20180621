@@ -13,15 +13,29 @@
 #pragma comment ( lib, "winmm.lib" )
 
 // サウンドファイルのパス（hの通しナンバーと合わせること）
-const TCHAR* c_soundFilename[] = {
-	//_T("data/BGM/sample000.wav"),
-	_T("data/BGM/memory1.wav"),
-	_T("data/BGM/crystal1.wav"),
-	_T("data/BGM/cyber_battle.wav"),
-	_T("data/BGM/forest1.wav"),
-	_T("data/BGM/crystal3.wav"),
-	_T("data/SE/bomb000.wav"),
-	_T("data/SE/summon1.wav")
+const TCHAR* c_soundFilename[] = {	
+	_T("data/BGM/1_memory1.wav"),
+	_T("data/BGM/1_memory1.wav"),
+	_T("data/BGM/2_crystal1.wav"),
+	_T("data/BGM/3_cyber_battle.wav"),
+	_T("data/BGM/4_grand1.wav"),
+	_T("data/BGM/5_grand2.wav"),
+	_T("data/BGM/6_grand3.wav"),
+	_T("data/BGM/7_crystal2.wav"),
+	_T("data/BGM/8_crystal3.wav"),
+	_T("data/BGM/9_memory2.wav"),
+	_T("data/BGM/10_memory3.wav"),
+	_T("data/SE/init.wav"),
+	_T("data/SE/arrow1.wav"),
+	_T("data/SE/hit1.wav"),
+	_T("data/SE/beam1.wav"),
+	_T("data/SE/item.wav"),
+	_T("data/SE/skill1.wav"),
+	_T("data/SE/skill2.wav"),
+	_T("data/SE/skill3.wav"),
+	_T("data/SE/summon1.wav"),
+	_T("data/SE/summon2.wav"),
+	_T("data/SE/summon3.wav"),
 };
 
 // グローバル変数

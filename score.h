@@ -18,8 +18,9 @@
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT InitScore(int type);
-void UninitScore(void);
-void UpdateScore(void);
-void DrawScore(void);
-void AddScore( int add );
+void	UninitScore(void);
+void	UpdateScore(void);
+void	DrawScore(void);
+void	AddScore( int add );
+int		GetScore(void);
 #endif

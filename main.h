@@ -30,8 +30,8 @@
 #pragma comment (lib, "winmm.lib")
 #endif
 
-#define SCREEN_WIDTH	(640)		// ウインドウの幅
-#define SCREEN_HEIGHT	(480)			// ウインドウの高さ
+#define SCREEN_WIDTH	(640)				// ウインドウの幅
+#define SCREEN_HEIGHT	(480)				// ウインドウの高さ
 #define SCREEN_CENTER_X	(SCREEN_WIDTH / 2)	// ウインドウの中心Ｘ座標
 #define SCREEN_CENTER_Y	(SCREEN_HEIGHT / 2)	// ウインドウの中心Ｙ座標
 
@@ -48,7 +48,7 @@
 *******************************************************************************/
 typedef struct {
 	char name[32];
-	int HP = 5;
+	int HP;
 	int MP;
 	int ATK;
 	int DEF;
@@ -64,7 +64,7 @@ typedef struct
 	float rhw;				// テクスチャのパースペクティブコレクト用
 	D3DCOLOR diffuse;		// 反射光
 	D3DXVECTOR2 tex;		// テクスチャ座標
-} VERTEX_2D;
+}	VERTEX_2D;
 
 // 画面遷移定数
 enum E_STAGE
@@ -82,4 +82,6 @@ enum E_STAGE
 LPDIRECT3DDEVICE9 GetDevice(void);		// デバイス取得関数
 
 void SetStage(int stage);
+void SetBGM(int no);
+bool CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float radius1, float radius2);
 #endif

@@ -54,7 +54,7 @@ HRESULT InitTitle(void)
 		OUT_DEFAULT_PRECIS, //OutputPrecision
 		ANTIALIASED_QUALITY, //Quality
 		DEFAULT_PITCH | FF_DONTCARE,//PitchAndFamily
-		"Algerian",          //pFacename,
+		"HGS行書体",          //pFacename,
 		&font);         //ppFont	
 	
 
@@ -88,6 +88,7 @@ void UpdateTitle(void)
 	{// Enter押したら、ステージを切り替える		
 		SetStage(1);		
 		//SetStage(STAGE_GAME);
+		SetBGM(2);
 	}
 	if (GetKeyboardTrigger(DIK_N))
 	{// N押したら、ステージを切り替える		
@@ -95,7 +96,8 @@ void UpdateTitle(void)
 		GetPlayer(0)->ready = 2;
 
 		GetPlayer(0)->view_mode = 0;
-		SwitchBG(4);	
+		SwitchBG(4);
+		SetBGM(3);
 		SetStage(STAGE_GAME);
 	}
 	// ゲームパッドでで移動処理
@@ -138,12 +140,17 @@ void DrawTitle(void)
 
 	// 文字の描画		
 
-	const char* strings[] = { "'Enter' To Start,\n\n 'N' to Skip Tutorial", "Produced by TSUI" };
-	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 53, 211, 255), D3DCOLOR_ARGB(255, 237, 255, 84)};
+	const char* strings[] = { "'Enter'で始まる,\n'N'で教学スキップ","制作：TSUI\n音楽:Music is VFR	魔王魂" };
+	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 120, 20, 70), D3DCOLOR_ARGB(255, 237, 255, 84)};
 	RECT r = { 0  , SCREEN_HEIGHT / 4 ,SCREEN_WIDTH,SCREEN_HEIGHT }; // starting point
 	RECT r2 = { 0 , 2* SCREEN_HEIGHT/3 ,SCREEN_WIDTH/2,SCREEN_HEIGHT}; // starting point	
+	//RECT r2 = { 2 * SCREEN_WIDTH / 3 , 2 * SCREEN_HEIGHT / 3 ,SCREEN_WIDTH / 2,SCREEN_HEIGHT }; // starting point
 	font->DrawText(NULL, strings[0], -1, &r, DT_CENTER | DT_VCENTER, colors[0]);
 	font->DrawText(NULL, strings[1], -1, &r2, DT_CENTER | DT_VCENTER, colors[1]);
+	//font->DrawText(NULL, strings[2], -1, &r, DT_RIGHT | DT_BOTTOM, colors[1]);
+
+
+	
 	
 }
 

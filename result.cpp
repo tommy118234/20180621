@@ -7,6 +7,7 @@
 #include "main.h"
 #include "result.h"
 #include "input.h"
+#include "score.h"
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -68,13 +69,30 @@ void UninitResult(void)
 //=============================================================================
 void UpdateResult(void)
 {
+	if (GetScore() <= 1) {
+
+		LPDIRECT3DDEVICE9 pDevice = GetDevice();
+		D3DXCreateTextureFromFile(pDevice,						// デバイスへのポインタ
+			TEXTURE_RESULT2,				// ファイルの名前
+			&g_pD3DTextureResult);		// 読み込むメモリー
+
+		SetBGM(10);
+		InitScore(1);
+		//Good End
+
+	}
 	if(GetKeyboardTrigger(DIK_RETURN))
 	{// Enter押したら、ステージを切り替える
+		
+
 		SetStage( STAGE_TITLE );
+		SetBGM(1);
+		InitScore(1);		// スコアの再初期化	
 	}
 	else if (IsButtonTriggered(0, BUTTON_B))
 	{
 		SetStage(STAGE_TITLE);
+		SetBGM(1);
 	}
 
 }
@@ -160,4 +178,3 @@ HRESULT MakeVertexResult(void)
 
 	return S_OK;
 }
-

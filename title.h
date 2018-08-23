@@ -12,7 +12,7 @@
 //#define	TEXTURE_TITLE		_T("data/TEXTURE/bg000.jpg")			// 読み込むテクスチャファイル名
 //#define	TEXTURE_TITLE_LOGO	_T("data/TEXTURE/title_logo.png")		// 読み込むテクスチャファイル名
 #define	TEXTURE_TITLE		_T("data/BG/moon.png")				// 読み込むテクスチャファイル名
-#define	TEXTURE_TITLE_LOGO	_T("data/TEXTURE/title_moon.png")		// 読み込むテクスチャファイル名
+#define	TEXTURE_TITLE_LOGO	_T("data/TEXTURE/title_logo.png")		// 読み込むテクスチャファイル名
 #define	TITLE_POS_X			(0)										// タイトルの表示位置
 #define	TITLE_POS_Y			(0)										// タイトルの表示位置
 #define	TITLE_SIZE_X		(800)									// タイトルの幅

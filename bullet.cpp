@@ -37,39 +37,32 @@ HRESULT InitBullet(int type)
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 	BULLET *bullet = &bulletWk[0];		// エネミーのポインターを初期化
 	PLAYER *player = GetPlayer(0);
-	
-	
-
 	for (int i = 0; i < BULLET_MAX; i++, bullet++) {
 		g_pSE = LoadSound(SE_00);
 		// テクスチャーの初期化を行う？
 		if (type == 0)
 		{
 			// テクスチャの読み込み
-			D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
-				TEXTURE_GAME_BULLET,			// ファイルの名前
-				&g_pD3DTextureBullet);			// 読み込むメモリのポインタ
+			D3DXCreateTextureFromFile(pDevice,			// デバイスのポインタ
+				TEXTURE_GAME_BULLET,					// ファイルの名前
+				&g_pD3DTextureBullet);					// 読み込むメモリのポインタ
 			//g_pSE = LoadSound(SE_00);
 		}
 		else if (type == 1) {
 			UninitBullet;
-		}
-						
+		}						
 		bullet->use = FALSE;									// 未使用（発射されていない弾）
 		bullet->pos = D3DXVECTOR3(-100.0f, 0.0f, 0.0f);			// 座標データを初期化
 		bullet->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			// 回転データを初期化
+		bullet->atk = 0;			// ATKを初期化
 		bullet->PatternAnim = 0;								// アニメパターン番号をランダムで初期化
 		bullet->CountAnim = 0;									// アニメカウントを初期化
-
-
 		bullet->BaseAngle = atan2f(TEXTURE_BULLET_SIZE_Y, TEXTURE_BULLET_SIZE_X);
 		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_BULLET_SIZE_X / 2, TEXTURE_BULLET_SIZE_Y / 2);
 		bullet->Radius = D3DXVec2Length(&temp);
-
 		bullet->Texture = g_pD3DTextureBullet;					// テクスチャ情報
 		MakeVertexBullet(i);									// 頂点情報の作成
 	}
-
 	return S_OK;
 }
 //=============================================================================
@@ -77,12 +70,11 @@ HRESULT InitBullet(int type)
 //=============================================================================
 void UninitBullet(void)
 {
-	if (g_pD3DTextureBullet != NULL)	//
+	if (g_pD3DTextureBullet != NULL)
 	{	// テクスチャの開放
 		g_pD3DTextureBullet->Release();
 		g_pD3DTextureBullet = NULL;
 	}	
-
 	if (g_pSE != NULL)
 	{	// テクスチャの開放
 		g_pSE->Release();
@@ -94,7 +86,6 @@ void UninitBullet(void)
 //=============================================================================
 void UpdateBullet(void)
 {
-
 	BULLET *bullet = bulletWk;			// バレットのポインターを初期化
 	
 	for (int i = 0; i < BULLET_MAX; i++, bullet++)
@@ -109,9 +100,9 @@ void UpdateBullet(void)
 				|| bullet->pos.x < -TEXTURE_BULLET_SIZE_X || bullet->pos.x > SCREEN_WIDTH)
 			{
 				bullet->use = false;
-				//bullet->Texture = NULL;					// テクスチャ情報
-				//bullet->Texture = g_pD3DTextureBullet;	// テクスチャ情報				
-				//bullet->pos.x = -100.0f;
+				bullet->Texture = NULL;					// テクスチャ情報
+				bullet->Texture = g_pD3DTextureBullet;	// テクスチャ情報				
+				bullet->pos.x = -100.0f;
 				//bullet->pos = D3DXVECTOR3(player->pos.x + TEXTURE_BULLET_SIZE_X / 2, player->pos.y, 0.0f);
 			}
 			SetVertexBullet(i);
@@ -175,20 +166,7 @@ void SetVertexBullet(int no)
 {	
 	BULLET *bullet = &bulletWk[no];			// バレットのポインターを初期化
 
-	// 頂点座標の設定
-	bullet->vertexWk[0].vtx = D3DXVECTOR3(bullet->pos.x - TEXTURE_BULLET_SIZE_X,
-										  bullet->pos.y - TEXTURE_BULLET_SIZE_Y,
-										  0);
-	bullet->vertexWk[1].vtx = D3DXVECTOR3(bullet->pos.x + TEXTURE_BULLET_SIZE_X,
-										  bullet->pos.y - TEXTURE_BULLET_SIZE_Y,
-										  0);
-	bullet->vertexWk[2].vtx = D3DXVECTOR3(bullet->pos.x - TEXTURE_BULLET_SIZE_X,
-										  bullet->pos.y + TEXTURE_BULLET_SIZE_Y,
-										  0);
-	bullet->vertexWk[3].vtx = D3DXVECTOR3(bullet->pos.x + TEXTURE_BULLET_SIZE_X,
-										  bullet->pos.y + TEXTURE_BULLET_SIZE_Y,
-										  0);
-
+	// 頂点座標の設定	
 	bullet->vertexWk[0].vtx = D3DXVECTOR3(bullet->pos.x - cosf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
 										  bullet->pos.y - sinf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
 										  0);
@@ -227,10 +205,9 @@ void SetTextureBullet(int no, int cntPattern)
 //=============================================================================
 // バレットの発射設定
 //=============================================================================
-void SetBullet(D3DXVECTOR3 pos, float rot)
+void SetBullet(D3DXVECTOR3 pos, float rot, int atk)
 {
 	BULLET *bullet = &bulletWk[0];			// バレットのポインターを初期化
-
 	// もし未使用の弾が無かったら発射しない( =これ以上撃てないって事 )
 	for (int i = 0; i < BULLET_MAX; i++, bullet++)
 	{
@@ -239,14 +216,14 @@ void SetBullet(D3DXVECTOR3 pos, float rot)
 			bullet->use = true;				// 使用状態へ変更する
 			bullet->pos = pos;				// 座標をセット
 			bullet->rot.z = rot;
-			//g_pSE = LoadSound(SE_00);
-			//// 発射音再生
-			//if (IsPlaying(g_pSE))
-			//	g_pSE->SetCurrentPosition(0);
-			//else {
-			//PlaySound(g_pSE, E_DS8_FLAG_NONE);
-			//}
-
+			bullet->atk = atk;
+			g_pSE = LoadSound(SE_01);
+			// 発射音再生
+			if (IsPlaying(g_pSE))
+				g_pSE->SetCurrentPosition(0);
+			else {
+			PlaySound(g_pSE, E_DS8_FLAG_NONE);
+			}
 			return;							// 1発セットしたので終了する
 		}
 	}

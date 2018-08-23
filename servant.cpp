@@ -1,6 +1,6 @@
 /*******************************************************************************
 * タイトル:		DirectXゲーム～はじめての個人作品～
-* プログラム名:	バレット処理 [SERVANT.cpp]
+* プログラム名:	Servant処理 [SERVANT.cpp]
 * 作成者:		GP11B 16　徐　ワイ延
 * 作成開始日:	2018/07/24
 ********************************************************************************/
@@ -10,9 +10,7 @@
 #include "SERVANT.h"
 #include "bullet.h"
 #include "sound.h"
-
 #include "bg.h"
-
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -28,9 +26,10 @@ void SetVertexSERVANT(int no);
 // グローバル変数
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTextureSERVANT = NULL;		// テクスチャへのポリゴン
-SERVANT					SERVANTWk[SERVANT_MAX];			// バレット構造体
+SERVANT					SERVANTWk[SERVANT_MAX];			// Servant構造体
 LPDIRECTSOUNDBUFFER8	g_pSE3;							// SE用バッファ
 
+int cooldown;
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -51,7 +50,7 @@ HRESULT InitSERVANT(int type)
 			D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 				TEXTURE_GAME_SERVANT,			// ファイルの名前
 				&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ
-			//g_pSE3 = LoadSound(SE_00);
+			g_pSE3 = LoadSound(SE_00);
 		}
 		else if (type == 1) {
 			UninitSERVANT;
@@ -96,39 +95,33 @@ void UninitSERVANT(void)
 void UpdateSERVANT(void)
 {
 
-	SERVANT *SERVANT = SERVANTWk;			// バレットのポインターを初期化
+	SERVANT *servant = SERVANTWk;			// Servantのポインターを初期化
 	ENEMY *enemy = GetEnemy(0);
-	for (int i = 0; i < SERVANT_MAX; i++, SERVANT++)
+	for (int i = 0; i < SERVANT_MAX; i++, servant++)
 	{
-		if (SERVANT->use == true)			// 未使用状態のバレットを見つける
+		if (servant->use == true)			// 未使用状態のServantを見つける
 		{
 			//// SERVANTの移動処理
-
-			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 > SERVANT->pos.x + TEXTURE_SERVANT_SIZE_X / 2 &&  SERVANT->rot.z < 1.57 - atan2f(SERVANT->pos.y + TEXTURE_SERVANT_SIZE_Y / 2, BG00_SIZE_X/2 - SERVANT->pos.x ))
-				SERVANT->rot.z += 0.1;			
-			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 < SERVANT->pos.x + TEXTURE_SERVANT_SIZE_X / 2 && SERVANT->rot.z > -(1.57 - atan2f(SERVANT->pos.y + TEXTURE_SERVANT_SIZE_Y / 2,SERVANT->pos.x -  BG00_SIZE_X/2 )))
-				SERVANT->rot.z -= 0.1;			
+			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 > servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2 &&  servant->rot.z < 1.57 - atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2, BG00_SIZE_X/2 - servant->pos.x ))
+				servant->rot.z += 0.1;			
+			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 < servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2 && servant->rot.z > -(1.57 - atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2,servant->pos.x -  BG00_SIZE_X/2 )))
+				servant->rot.z -= 0.1;			
 			
-			if (SERVANT->bullet_cooldown < 1) {				
-				SERVANT->bullet_cooldown = 20;
-				D3DXVECTOR3 pos = SERVANT->pos;
-				//pos.y -= TEXTURE_SERVANT_SIZE_Y;				
-				pos.x -= GetPlayer(0)->pos.x / 4.0f;
-				if (SERVANT->rot.z> 0)
-				SetBullet(pos,SERVANT->rot.z);
-				else
-				SetBullet(pos,  SERVANT->rot.z);
+			if (cooldown < 1) {					
+				D3DXVECTOR3 pos = servant->pos;							
+				pos.x -= GetPlayer(0)->pos.x / 4.0f;				
+				SetBullet(pos, servant->rot.z,servant->status.ATK);	
+				cooldown = servant->bullet_cooldown;
 			}
-			else {
-				SERVANT->bullet_cooldown--;
-			}
-
-			// 画面外まで進んだ？
-			if (SERVANT->pos.y < -TEXTURE_SERVANT_SIZE_Y)
+			else
 			{
-				SERVANT->use = FALSE;
-				SERVANT->pos.x = -100.0f;
-				//SERVANT->pos = D3DXVECTOR3(player->pos.x + TEXTURE_SERVANT_SIZE_X / 2, player->pos.y, 0.0f);
+				cooldown--;
+			}
+			// 画面外まで進んだ？
+			if (servant->pos.y < -TEXTURE_SERVANT_SIZE_Y)
+			{
+				servant->use = FALSE;
+				servant->pos.x = -100.0f;
 			}
 			SetVertexSERVANT(i);
 		}
@@ -140,7 +133,7 @@ void UpdateSERVANT(void)
 void DrawSERVANT(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	SERVANT *SERVANT = SERVANTWk;				// バレットのポインターを初期化
+	SERVANT *SERVANT = SERVANTWk;				// Servantのポインターを初期化
 
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
@@ -189,7 +182,7 @@ HRESULT MakeVertexSERVANT(int no)
 //=============================================================================
 void SetVertexSERVANT(int no)
 {
-	SERVANT *SERVANT = &SERVANTWk[no];			// バレットのポインターを初期化
+	SERVANT *SERVANT = &SERVANTWk[no];			// Servantのポインターを初期化
 
 	// 頂点座標の設定
 	SERVANT->vertexWk[0].vtx = D3DXVECTOR3(SERVANT->pos.x - TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
@@ -227,7 +220,7 @@ void SetVertexSERVANT(int no)
 //=============================================================================
 void SetTextureSERVANT(int no, int cntPattern)
 {
-	SERVANT *SERVANT = &SERVANTWk[no];			// バレットのポインターを初期化
+	SERVANT *SERVANT = &SERVANTWk[no];			// Servantのポインターを初期化
 
 	// テクスチャ座標の設定
 	int x = cntPattern % TEXTURE_PATTERN_DIVIDE_X_SERVANT;
@@ -242,18 +235,18 @@ void SetTextureSERVANT(int no, int cntPattern)
 }
 
 //=============================================================================
-// バレットの発射設定
+// Servantの発射設定
 //=============================================================================
 void SetSERVANT(D3DXVECTOR3 pos, int type)
 {
-	SERVANT *SERVANT = &SERVANTWk[0];			// バレットのポインターを初期化
+	SERVANT *SERVANT = &SERVANTWk[0];			// Servantのポインターを初期化
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
 
 
 	// もし未使用の弾が無かったら発射しない( =これ以上撃てないって事 )
 	for (int i = 0; i < SERVANT_MAX; i++, SERVANT++)
 	{
-		if (SERVANT->use == false)			// 未使用状態のバレットを見つける
+		if (SERVANT->use == false)			// 未使用状態のServantを見つける
 		{
 
 			SERVANT->use = true;				// 使用状態へ変更する
@@ -262,36 +255,39 @@ void SetSERVANT(D3DXVECTOR3 pos, int type)
 			case 1:
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_SERVANT,			// ファイルの名前
-					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ
+					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ	
+				SERVANT->status.ATK = 75;
+				SERVANT->bullet_cooldown = 50;
 				break;
 			case 2:
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_SERVANT2,			// ファイルの名前
-					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ
+					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ	
+				SERVANT->status.ATK = 100;
+
+				SERVANT->bullet_cooldown = 70;
 				break;
 			case 3:
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_SERVANT3,			// ファイルの名前
 					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ
-				break;
+				SERVANT->status.ATK = 250;	
+				SERVANT->bullet_cooldown = 100;
+				break;		
 			}
-			SERVANT->Texture = g_pD3DTextureSERVANT;					// テクスチャ情報
-			//MakeVertexSERVANT(i);									// 頂点情報の作成
-			SERVANT->pos = pos;				// 座標をセット
-
-			g_pSE3 = LoadSound(SE_01);
-			// 発射音再生
+			// 召喚音再生
+			g_pSE3 = LoadSound(18+type);			
 			if (IsPlaying(g_pSE3))
 				g_pSE3->SetCurrentPosition(0);
 			else {
 				PlaySound(g_pSE3, E_DS8_FLAG_NONE);
 			}
-
+			SERVANT->Texture = g_pD3DTextureSERVANT;					// テクスチャ情報			
+			SERVANT->pos = pos;				// 座標をセット			
 			return;							// 1発セットしたので終了する
 		}
 	}
 }
-
 /*******************************************************************************
 関数名:	SERVANT *GetSERVANTAdr( int pno )
 引数:	int pno : SERVANT番号

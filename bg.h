@@ -24,10 +24,10 @@
 // プロトタイプ宣言
 //*****************************************************************************
 HRESULT InitBG(int type);
-void UninitBG(void);
-void UpdateBG(void);
-void DrawBG(void);
-void SwitchBG(int type);
+void	 UninitBG(void);
+void	UpdateBG(void);
+void	DrawBG(void);
+void	SwitchBG(int type);
 
-void ChangeBG(void);
+void	ChangeBG(void);
 #endif
