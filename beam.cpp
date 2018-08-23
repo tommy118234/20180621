@@ -145,16 +145,16 @@ void SetVertexBeam(int no)
 	BEAM *beam = &beamWk[no];			// Beamのポインターを初期化
 
 	// 頂点座標の設定	
-	beam->vertexWk[3].vtx = D3DXVECTOR3(beam->pos.x - cosf(beam->BaseAngle + beam->rot.z) * beam->Radius - GetPlayer(0)->pos.x / 4.0f,
+	beam->vertexWk[3].vtx = D3DXVECTOR3(beam->pos.x - cosf(beam->BaseAngle + beam->rot.z) * beam->Radius ,
 										beam->pos.y - sinf(beam->BaseAngle + beam->rot.z) * beam->Radius,
 										0);
-	beam->vertexWk[2].vtx = D3DXVECTOR3(beam->pos.x + cosf(beam->BaseAngle - beam->rot.z) * beam->Radius - GetPlayer(0)->pos.x / 4.0f,
+	beam->vertexWk[2].vtx = D3DXVECTOR3(beam->pos.x + cosf(beam->BaseAngle - beam->rot.z) * beam->Radius,
 										beam->pos.y - sinf(beam->BaseAngle - beam->rot.z) *beam->Radius,
 										0);
-	beam->vertexWk[1].vtx = D3DXVECTOR3(beam->pos.x - cosf(beam->BaseAngle - beam->rot.z) * beam->Radius - GetPlayer(0)->pos.x / 4.0f,
+	beam->vertexWk[1].vtx = D3DXVECTOR3(beam->pos.x - cosf(beam->BaseAngle - beam->rot.z) * beam->Radius,
 										beam->pos.y + sinf(beam->BaseAngle - beam->rot.z) * beam->Radius,
 										0);
-	beam->vertexWk[0].vtx = D3DXVECTOR3(beam->pos.x + cosf(beam->BaseAngle + beam->rot.z) * beam->Radius - GetPlayer(0)->pos.x / 4.0f,
+	beam->vertexWk[0].vtx = D3DXVECTOR3(beam->pos.x + cosf(beam->BaseAngle + beam->rot.z) * beam->Radius,
 										beam->pos.y + sinf(beam->BaseAngle + beam->rot.z) * beam->Radius,
 										0);
 }
@@ -179,7 +179,7 @@ void SetTextureBeam(int no, int cntPattern)
 //=============================================================================
 // Beamの発射設定
 //=============================================================================
-void SetBeam(D3DXVECTOR3 pos, float rot)
+void SetBeam(D3DXVECTOR3 pos, float rot, int atk)
 {
 	BEAM *beam = &beamWk[0];			// Beamのポインターを初期化
 	// もし未使用の弾が無かったら発射しない( =これ以上撃てないって事 )
@@ -190,6 +190,7 @@ void SetBeam(D3DXVECTOR3 pos, float rot)
 			beam->use = true;				// 使用状態へ変更する
 			beam->pos = pos;				// 座標をセット
 			beam->rot.z = rot;			
+			beam->atk = atk;
 			return;							// 1発セットしたので終了する
 		}
 	}

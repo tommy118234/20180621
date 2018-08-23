@@ -18,7 +18,7 @@
 #define TIME_ANIMATION_BEAM				(50)		// アニメーションの切り替わるカウント
 
 #define BEAM_MAX						(50)		// Beamの最大数
-#define BEAM_SPEED						(6.0f)		// Beamの移動スピード
+#define BEAM_SPEED						(5.0f)		// Beamの移動スピード
 /*******************************************************************************
 * 構造体定義
 ********************************************************************************/
@@ -33,6 +33,7 @@ typedef struct										// Beamの構造体
 	VERTEX_2D				vertexWk[NUM_VERTEX];	// 頂点情報格納ワーク
 	float					Radius;					// ポリゴンの半径
 	float					BaseAngle;				// ポリゴンの角度	
+	int						atk;
 } BEAM;
 //*****************************************************************************
 // プロトタイプ宣言
@@ -41,6 +42,6 @@ HRESULT InitBeam(int type);
 void	UninitBeam(void);
 void	UpdateBeam(void);
 void	DrawBeam(void);
-void	SetBeam(D3DXVECTOR3 pos, float rot);
+void	SetBeam(D3DXVECTOR3 pos, float rot, int ATK);
 BEAM	*GetBeam(int pno);							// Beamの(アドレス)を取得
 #endif

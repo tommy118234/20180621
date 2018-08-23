@@ -74,7 +74,7 @@ HRESULT InitPlayer(int type)
 		player->view_mode = 1;
 		player->ready = 0;
 
-		player->status.HP = 500;								// HP‚ğ‰Šú‰»
+		player->status.HP = 1000;								// HP‚ğ‰Šú‰»
 		player->status.MP = 200;								// MP‚ğ‰Šú‰»
 		player->status.ATK = 100;								// ATK‚ğ‰Šú‰»
 		player->status.DEF = 100;								// DEF‚ğ‰Šú‰»

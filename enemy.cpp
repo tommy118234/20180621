@@ -63,7 +63,7 @@ HRESULT InitEnemy(int type)
 
 		enemy->status.HP = 10000;								// HPを初期化
 		enemy->status.MP= 100;									// MPを初期化
-		enemy->status.ATK = 300;								// ATKを初期化
+		enemy->status.ATK = 150;								// ATKを初期化
 		enemy->status.DEF = 50;									// DEFを初期化
 		enemy->status.LUCK = 100;								// LUCKを初期化
 		enemy->mode = 0;										// modeを初期化
@@ -145,21 +145,18 @@ void UpdateEnemy(void)
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_ENEMY,				// ファイルの名前
 					&g_pD3DTextureEnemy);			// 読み込むメモリのポインタ
-				enemy->Texture = g_pD3DTextureEnemy;					// テクスチャ情報	
-				//recharge = 2;
+				enemy->Texture = g_pD3DTextureEnemy;	// テクスチャ情報					
 				SetBGM(4);
 				enemy->status.DEF = 150;
-
 			}		
 
 			if (enemy->status.HP < 5000 && enemy->mode == 1) {
 				enemy->mode = 2;
 				enemy->PatternAnim = 1;
 				// テクスチャ座標を設定
-				SetTextureEnemy(i, player->PatternAnim);
-				//recharge = 3;
+				SetTextureEnemy(i, player->PatternAnim);				
 				SetBGM(5);
-
+				enemy->status.ATK = 200;
 				enemy->status.DEF = 250;
 			}
 
@@ -167,10 +164,9 @@ void UpdateEnemy(void)
 				enemy->mode = 3;
 				enemy->PatternAnim = 2;
 				// テクスチャ座標を設定
-				SetTextureEnemy(i, player->PatternAnim);
-				//recharge = 4;
+				SetTextureEnemy(i, player->PatternAnim);				
 				SetBGM(6);
-
+				enemy->status.ATK = 250;
 				enemy->status.DEF = 400;
 			}
 
@@ -191,11 +187,18 @@ void UpdateEnemy(void)
 					else {
 						PlaySound(g_pSE4, E_DS8_FLAG_NONE);
 					}
-					for (int i = 0; i < 10; i++) {
-						pos.x = 4 * i * BG00_SIZE_X / 10;
+					//for (int i = 0; i < 10; i++) {
+					//	pos.x = 4 * i * BG00_SIZE_X / 10;
+					//	pos.y = enemy->pos.y + 100 * sinf(i / 4 * 1.57);
+					//
+					//	SetBeam(pos, enemy->rot.z);
+					//}
+
+					for (int i = 0; i < 100; i++) {
+						pos.x = 10 * i * BG00_SIZE_X / 100;
 						pos.y = enemy->pos.y + 100 * sinf(i / 4 * 1.57);
 
-						SetBeam(pos, enemy->rot.z);
+						SetBeam(pos, enemy->rot.z, enemy->status.ATK);
 					}
 					beam_cooldown = 30;
 					break;
@@ -209,12 +212,17 @@ void UpdateEnemy(void)
 					else {
 						PlaySound(g_pSE4, E_DS8_FLAG_NONE);
 					}
-					for (int i = 1; i < 21; i++) {
-						pos.x  = 4* i * BG00_SIZE_X/20;
-						pos.y  = enemy->pos.y + 20 * sinf(i/3 * 1.57);
-						SetBeam(pos, enemy->rot.z);						
-					}
+					//or (int i = 1; i < 21; i++) {
+					//	pos.x  = 4* i * BG00_SIZE_X/20;
+					//	pos.y  = enemy->pos.y + 20 * sinf(i/3 * 1.57);
+					//	SetBeam(pos, enemy->rot.z);						
+					//
+					for (int i = 0; i < 100; i++) {
+						pos.x = 7 * i * BG00_SIZE_X / 100;
+						pos.y = enemy->pos.y + 100 * sinf(i / 4 * 1.57);
 
+						SetBeam(pos, enemy->rot.z, enemy->status.ATK);
+					}
 					beam_cooldown = 50;
 					break;
 
@@ -234,10 +242,10 @@ void UpdateEnemy(void)
 						PlaySound(g_pSE4, E_DS8_FLAG_NONE);
 					}
 					for (int i = 0; i < 100; i++) {
-						pos.x = 4 * i * BG00_SIZE_X / 100;
+						pos.x = 3 * i * BG00_SIZE_X / 100;
 						pos.y = enemy->pos.y + 100 * sinf(i /4 * 1.57);
 
-						SetBeam(pos, enemy->rot.z);
+						SetBeam(pos, enemy->rot.z, enemy->status.ATK);
 					}
 					beam_cooldown = 100;
 					break;

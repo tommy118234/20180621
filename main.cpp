@@ -657,6 +657,7 @@ void CheckHit(void)
 	//		player->status.HP -= 100;
 	//	}
 	//}
+
 	// ボスと弾(BC) // bullet(heavy) inside loop, enemy(light) outer loop
 	enemy = GetEnemy(0);					// エネミーのポインターを初期化
 
@@ -693,8 +694,8 @@ void CheckHit(void)
 			//if (CheckHitBB(beam->pos, player->pos, D3DXVECTOR2(TEXTURE_BEAM_SIZE_X, TEXTURE_BEAM_SIZE_Y), D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y)))
 			{
 				beam->use = false;			// 敵のBeamの消滅処理を行い
-				if (enemy->status.ATK - player->status.DEF>0)
-				player->status.HP -= enemy->status.ATK - player->status.DEF;	// 操作キャラクターHP減少処理
+				if (beam->atk - player->status.DEF>0)
+				player->status.HP -= beam->atk - player->status.DEF;	// 操作キャラクターHP減少処理
 				if (player->status.HP < 1)
 				{
 					player->use = false;	// 操作キャラクターは死に										
