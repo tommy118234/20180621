@@ -85,8 +85,10 @@ void UninitTitle(void)
 void UpdateTitle(void)
 {
 	if (GetKeyboardTrigger(DIK_RETURN) )
-	{// Enter押したら、ステージを切り替える		
+	{// Enter押したら、ステージを切り替える	
+	
 		SetStage(1);		
+
 		//SetStage(STAGE_GAME);
 		SetBGM(2);
 	}
@@ -141,13 +143,11 @@ void DrawTitle(void)
 	// 文字の描画		
 
 	const char* strings[] = { "'Enter'で始まる,\n'N'で教学スキップ","制作：TSUI\n音楽:Music is VFR	魔王魂" };
-	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 120, 20, 70), D3DCOLOR_ARGB(255, 237, 255, 84)};
+	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 120, 20, 70), D3DCOLOR_ARGB(255, 237, 200, 50)};
 	RECT r = { 0  , SCREEN_HEIGHT / 4 ,SCREEN_WIDTH,SCREEN_HEIGHT }; // starting point
 	RECT r2 = { 0 , 2* SCREEN_HEIGHT/3 ,SCREEN_WIDTH/2,SCREEN_HEIGHT}; // starting point	
-	//RECT r2 = { 2 * SCREEN_WIDTH / 3 , 2 * SCREEN_HEIGHT / 3 ,SCREEN_WIDTH / 2,SCREEN_HEIGHT }; // starting point
 	font->DrawText(NULL, strings[0], -1, &r, DT_CENTER | DT_VCENTER, colors[0]);
-	font->DrawText(NULL, strings[1], -1, &r2, DT_CENTER | DT_VCENTER, colors[1]);
-	//font->DrawText(NULL, strings[2], -1, &r, DT_RIGHT | DT_BOTTOM, colors[1]);
+	//font->DrawText(NULL, strings[1], -1, &r2, DT_CENTER | DT_VCENTER, colors[1]);
 
 
 	

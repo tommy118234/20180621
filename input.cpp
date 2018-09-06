@@ -66,8 +66,7 @@ HRESULT InitInput(HINSTANCE hInst, HWND hWnd)
 	if(!g_pDInput)
 	{
 		// DirectInputオブジェクトの作成
-		hr = DirectInput8Create(hInst, DIRECTINPUT_VERSION,
-									IID_IDirectInput8, (void**)&g_pDInput, NULL);
+		hr = DirectInput8Create(hInst, DIRECTINPUT_VERSION,	IID_IDirectInput8, (void**)&g_pDInput, NULL);
 	}
 	// キーボードの初期化
 	InitKeyboard(hInst, hWnd);

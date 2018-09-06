@@ -6,28 +6,25 @@
 ********************************************************************************/
 #ifndef _BG_H_
 #define _BG_H_
-
 // ƒ}ƒNƒ’è‹`
-#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")			// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG01		_T("data/BG/story1.png")		// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG02		_T("data/BG/story2.png")		// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG03		_T("data/BG/battleGuide.png")	// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG04		_T("data/BG/battle_ice.png")	// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG05		_T("data/BG/ice_castle.png")	// ”wŒi‰æ‘œ
-#define TEXTURE_GAME_BG06		_T("data/BG/moon_red.png")		// ”wŒi‰æ‘œ
-
-#define BG00_SIZE_X			(800)	// ƒeƒNƒXƒ`ƒƒƒTƒCƒY
-#define BG00_SIZE_Y			(600)	// “¯ã
-#define BG00_POS_X			(0)		// ƒ|ƒŠƒSƒ“‚Ì‰ŠúˆÊ’uX(¶ã)
-#define BG00_POS_Y			(0)		// “¯ã
+#define TEXTURE_GAME_BG00		_T("data/BG/moon.png")			// ”wŒi‰æ‘œ1
+#define TEXTURE_GAME_BG01		_T("data/BG/story1.png")		// ”wŒi‰æ‘œ2
+#define TEXTURE_GAME_BG02		_T("data/BG/story2.png")		// ”wŒi‰æ‘œ3
+#define TEXTURE_GAME_BG03		_T("data/BG/battleGuide.png")	// ”wŒi‰æ‘œ4
+#define TEXTURE_GAME_BG04		_T("data/BG/battle_ice.png")	// ”wŒi‰æ‘œ5
+#define TEXTURE_GAME_BG05		_T("data/BG/ice_castle.png")	// ”wŒi‰æ‘œ6
+#define TEXTURE_GAME_BG06		_T("data/BG/moon_red.png")		// ”wŒi‰æ‘œ7
+#define BG00_SIZE_X				(800)							// ƒeƒNƒXƒ`ƒƒƒTƒCƒY
+#define BG00_SIZE_Y				(600)							// “¯ã
+#define BG00_POS_X				(0)								// ƒ|ƒŠƒSƒ“‚Ì‰ŠúˆÊ’uX(¶ã)
+#define BG00_POS_Y				(0)								// “¯ã
 //*****************************************************************************
 // ƒvƒƒgƒ^ƒCƒvéŒ¾
 //*****************************************************************************
 HRESULT InitBG(int type);
-void	 UninitBG(void);
+void	UninitBG(void);
 void	UpdateBG(void);
 void	DrawBG(void);
 void	SwitchBG(int type);
-
 void	ChangeBG(void);
 #endif

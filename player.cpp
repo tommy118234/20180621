@@ -30,11 +30,10 @@ LPDIRECT3DTEXTURE9		g_pD3DTexturePlayer = NULL;		// テクスチャへのポリゴン
 PLAYER					playerWk[PLAYER_MAX];			// プレイヤー構造体
 LPDIRECTSOUNDBUFFER8	g_pSE2;							// SE用バッファ
 
-int bullet_cooldown = 0;
-int moving_cooldown = 0;
-int skill_cooldown = 0;
-int acceleration = 0;
 bool jump_cooldown = FALSE;
+float post_x = 0;
+float post_y = 0;
+bool overlap = false;
 
 ID3DXFont*				font2 = NULL;                // 文字のポインタ
 const char* strings2[] = { "戦闘演習を始まりますか？" };
@@ -74,7 +73,7 @@ HRESULT InitPlayer(int type)
 		player->view_mode = 1;
 		player->ready = 0;
 
-		player->status.HP = 1000;								// HPを初期化
+		player->status.HP = 2000;								// HPを初期化
 		player->status.MP = 200;								// MPを初期化
 		player->status.ATK = 100;								// ATKを初期化
 		player->status.DEF = 100;								// DEFを初期化
@@ -86,7 +85,7 @@ HRESULT InitPlayer(int type)
 		player->BaseAngle = atan2f(TEXTURE_PLAYER_SIZE_Y, TEXTURE_PLAYER_SIZE_X);	// プレイヤーの角度を初期化
 
 		player->Texture = g_pD3DTexturePlayer;				// テクスチャ情報
-		MakeVertexPlayer(i);						// 頂点情報の作成
+		MakeVertexPlayer(i);								// 頂点情報の作成
 
 	}
 	return S_OK;	
@@ -126,6 +125,7 @@ void UpdatePlayer(void)
 			TEXTURE_GAME_PLAYER,				// ファイルの名前
 			&g_pD3DTexturePlayer);				// 読み込むメモリのポインタ
 		Top_to_SideView();
+		player->gravity = 5;
 		player->Texture = g_pD3DTexturePlayer;	// テクスチャ情報
 		player->pos = D3DXVECTOR3(SCREEN_WIDTH / 2 - TEXTURE_PLAYER_SIZE_X / 2, SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y, 0.0f);
 		player->view_mode = 2;
@@ -133,80 +133,107 @@ void UpdatePlayer(void)
 	for (int i = 0; i < PLAYER_MAX; i++, player++)
 	{
 		//万有引力
-		if (!jump_cooldown && player->gravity > 0) {
-			player->pos.y += player->gravity + acceleration;
-			if (acceleration >= 0) {
-				acceleration -= 1;
+		if (!jump_cooldown && player->gravity > 0)
+		{
+			player->pos.y += player->gravity + player->acceleration;
+			if (player->acceleration >= 0) {
+				player->acceleration -= 1;
 
 			}
-			else if (acceleration < 0)
-				acceleration = 0;
+			else if (player->acceleration < 0)
+				player->acceleration = 0;
 		}
 		//Jump
-		if (jump_cooldown) {
-			if (acceleration > 0) {
-				player->pos.y -= acceleration;
-				acceleration -= 2;
+		if (jump_cooldown) 
+		{
+			if (player->acceleration > 0) {
+				player->pos.y -= player->acceleration;
+				player->acceleration -= 2;
 			}
 			else {
 				jump_cooldown = FALSE;
-				acceleration = 20 + acceleration / 2;
+				player->acceleration = 20 + player->acceleration / 2;
 			}
 		}
 		if (player->use == true)			// 使用している状態なら更新する
 		{
 			// アニメーション
 			player->CountAnim++;
-			if (moving_cooldown > 0) {
+			if (player->moving_cooldown > 0) {
 				player->PatternAnim = (player->PatternAnim + 1) % ANIM_PATTERN_NUM;
 				// テクスチャ座標を設定
 				SetTexturePlayer(i, player->PatternAnim);
 				if (player->PatternAnim == 1 || player->PatternAnim == 6)
-					moving_cooldown--;
+					player->moving_cooldown--;
 			}
-			// 画面外判定
-			if (player->pos.x < 0)
-			{
-				player->pos.x = 0;
-			}
-			if (player->pos.x > SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X)
-			{
-				player->pos.x = SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X;
-			}
-			if (player->pos.y < 0)
-			{
-				player->pos.y = SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y;
-			}
-			if (player->pos.y > SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y)
-			{
-				player->pos.y = SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y;
-				acceleration = 0;
-				jump_cooldown = FALSE;
-			}
+			
 
 			// キーボード入力で移動
 			if (GetKeyboardPress(DIK_DOWN) && player->gravity == 0) {
 				if (player->gravity == 0)
-					moving_cooldown = 1;
+				{
+					player->moving_cooldown = 1;
+					post_x = player->pos.x;
+					post_y = player->pos.y;
+					player->pos.x -= 5 * (-sinf(player->BaseAngle + player->rot.z) + cosf(player->BaseAngle + player->rot.z));
+					player->pos.y -= 5 * (cosf(player->BaseAngle + player->rot.z) + sinf(player->BaseAngle + player->rot.z));
+				}
 				player->pos.y += 5;
 			}
-			if (GetKeyboardPress(DIK_UP)) {
-				if (player->gravity != 0) {
-					if (acceleration == 0 && !jump_cooldown) {
+			if (GetKeyboardPress(DIK_UP)) 
+			{
+				if (player->gravity != 0 && !jump_cooldown && player->acceleration == 0)
+				{
 						// jump
-						acceleration = 20;
+						player->acceleration = 20;
 						jump_cooldown = TRUE;
-					}
 				}
-				else {
-					moving_cooldown = 1;
+				else 
+				{
+					// pos update
+					player->moving_cooldown = 1;
+					post_x = player->pos.x;
+					post_y = player->pos.y;
 					player->pos.x -= 5 * (-sinf(player->BaseAngle + player->rot.z) + cosf(player->BaseAngle + player->rot.z));
 					player->pos.y -= 5 * (cosf(player->BaseAngle + player->rot.z) + sinf(player->BaseAngle + player->rot.z));							
 				}
 			}
+
+			// 画面外判定
+			if (player->pos.x < 0 + TEXTURE_PLAYER_SIZE_X)
+			{
+				player->pos.x = 0 + TEXTURE_PLAYER_SIZE_X;
+
+				if (player->gravity == 0)
+				player->pos.y = post_y;
+			}
+			if (player->pos.x > SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X)
+			{
+				player->pos.x = SCREEN_WIDTH - TEXTURE_PLAYER_SIZE_X;
+
+				if (player->gravity == 0)
+				player->pos.y = post_y;
+			}
+			if (player->pos.y < 0)
+			{
+				player->pos.y = 0;
+				if (player->gravity == 0)
+				player->pos.x = post_x;
+			}
+			if (player->pos.y > SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y)
+			{
+				player->pos.y = SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y;
+
+				if (player->gravity == 0) {
+					player->pos.x = post_x;
+					player->acceleration = 0;
+					jump_cooldown = FALSE;
+				}
+			}
+
 			if (GetKeyboardPress(DIK_LEFT)) {
 				if (player->gravity != 0) {
-					moving_cooldown = 1;
+					player->moving_cooldown = 1;
 					player->direction = -1;
 					player->pos.x -= 5;
 				}
@@ -216,7 +243,7 @@ void UpdatePlayer(void)
 			}
 			if (GetKeyboardPress(DIK_RIGHT)) {
 				if (player->gravity != 0) {
-					moving_cooldown = 1;
+					player->moving_cooldown = 1;
 					player->direction = 1;
 
 					player->pos.x += 5;
@@ -225,98 +252,130 @@ void UpdatePlayer(void)
 					player->rot.z += 0.1f;
 				}
 			}
-			// MP消費
-			if (player->status.MP > 20 && player->direction == -1) {
-				
+			// MP消費召喚
+			if (player->gravity == 0)
+			{				
+
+				SERVANT *servant = GetServant(0);
+				for (int i = 0; i < SERVANT_MAX; i++, servant++)
+				{
+					if (servant->use)
+					{
+						if (CheckHitBC(servant->pos, player->pos, servant->Radius, servant->Radius))
+							overlap = true;
+					}
+				}
+
 				// 召喚 1
-				if (GetKeyboardPress(DIK_Q) && (bullet_cooldown == 0)) {
-					bullet_cooldown += 5;
-					player->status.MP -= 20;
-					D3DXVECTOR3 pos = player->pos;
-					pos.y -= TEXTURE_PLAYER_SIZE_Y;
-					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
-					SetSERVANT(pos, 1);
+				if (GetKeyboardPress(DIK_Q) && (player->bullet_cooldown == 0) && !overlap)
+				{
+					player->bullet_cooldown += 5;
+					if (player->status.MP > 20 )
+					{
+						player->status.MP -= 20;
+						D3DXVECTOR3 pos = player->pos;
+						pos.y -= TEXTURE_PLAYER_SIZE_Y;
+						pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;						
+						SetServant(pos, 1);
+					}
 				}
 				// 召喚 2
-				if (GetKeyboardPress(DIK_W) && (bullet_cooldown == 0)) {
-					bullet_cooldown += 5;
-					player->status.MP -= 20;
-					D3DXVECTOR3 pos = player->pos;
-					pos.y -= TEXTURE_PLAYER_SIZE_Y;
-					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
-					SetSERVANT(pos, 2);
+				if (GetKeyboardPress(DIK_W) && (player->bullet_cooldown == 0) && !overlap)
+				{
+					player->bullet_cooldown += 5;
+					if (player->status.MP > 40)
+					{
+						player->status.MP -= 40;
+						D3DXVECTOR3 pos = player->pos;
+						pos.y -= TEXTURE_PLAYER_SIZE_Y;
+						pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
+						SetServant(pos, 2);
+					}
 				}
 				// 召喚 3
-				if (GetKeyboardPress(DIK_E) && (bullet_cooldown == 0)) {
-					bullet_cooldown += 5;
-					player->status.MP -= 20;
-					D3DXVECTOR3 pos = player->pos;
-					pos.y -= TEXTURE_PLAYER_SIZE_Y;
-					pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
-					SetSERVANT(pos, 3);
-				}
-				// スキル 1
-				if (GetKeyboardPress(DIK_A)) {
-					g_pSE2 = LoadSound(16);
-					// 発射音再生
-					if (IsPlaying(g_pSE2))
-						g_pSE2->SetCurrentPosition(0);
-					else {
-						PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+				if (GetKeyboardPress(DIK_E) && (player->bullet_cooldown == 0) && !overlap)
+				{
+					player->bullet_cooldown += 5;
+					if (player->status.MP > 60)
+					{
+						player->status.MP -= 60;
+						D3DXVECTOR3 pos = player->pos;
+						pos.y -= TEXTURE_PLAYER_SIZE_Y;
+						pos.x += TEXTURE_PLAYER_SIZE_X + player->pos.x / 4.0f;
+						SetServant(pos, 3);
 					}
-					player->status.ATK += 50;
-					player->status.MP -= 20;
-				}
-				// スキル 2
-				if (GetKeyboardPress(DIK_S)) {
-					g_pSE2 = LoadSound(17);
-					// 発射音再生
-					if (IsPlaying(g_pSE2))
-						g_pSE2->SetCurrentPosition(0);
-					else {
-						PlaySound(g_pSE2, E_DS8_FLAG_NONE);
-					}
-					player->status.DEF += 50;
-					player->status.MP -= 20;
 				}
 				
 			}
-			// スキル 3
-			if (GetKeyboardPress(DIK_D)) {
-				g_pSE2 = LoadSound(18);
-				// 発射音再生
+			// スキル 1
+			if (GetKeyboardPress(DIK_A) && (player->skill1_cooldown == 0) && player->status.MP >= 20 && player->status.ATK <= 500)
+			{
+
+				// スキル音再生
+				g_pSE2 = LoadSound(16);
 				if (IsPlaying(g_pSE2))
 					g_pSE2->SetCurrentPosition(0);
-				else {
+				else
+				{
+					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+				}
+				player->status.ATK += 50;
+
+				SERVANT *servant = GetServant(0);
+				for (int i = 0; i < SERVANT_MAX; i++, servant++)
+				{
+					if (servant->use)
+					{
+						servant->status.ATK += 25;
+					}
+				}
+				player->status.MP -= 20;
+				player->skill1_cooldown = 100;
+			}
+			// スキル 2
+			if (GetKeyboardPress(DIK_S) && (player->skill2_cooldown == 0) && player->status.MP >= 50 && player->status.DEF <= 250)
+			{
+				// スキル音再生
+				g_pSE2 = LoadSound(17);
+				if (IsPlaying(g_pSE2))
+					g_pSE2->SetCurrentPosition(0);
+				else
+				{
+					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
+				}
+				player->status.DEF += 50;
+				player->status.MP -= 50;
+				player->status.HP -= 50;
+				player->skill2_cooldown = 100;
+			}
+			// スキル 3
+			if (GetKeyboardPress(DIK_D) && (player->skill3_cooldown == 0) && player->status.HP > 50)
+			{
+				g_pSE2 = LoadSound(18);
+				// スキル音再生
+				if (IsPlaying(g_pSE2))
+					g_pSE2->SetCurrentPosition(0);
+				else 
+				{
 					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
 				}
 				player->status.HP -= 50;
 				player->status.MP += 50;
+
+				player->skill3_cooldown = 20;
 			}
+
 			// 攻撃モードスウィッチ
-			if (GetKeyboardPress(DIK_F))
-			{
-				// 攻撃モードスウィッチ音再生
-				g_pSE2 = LoadSound(14);
-				
-				if (IsPlaying(g_pSE2))
-					g_pSE2->SetCurrentPosition(0);
-				else {
-					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
-				}
-				player->direction = 1;
-			}
-			if (GetKeyboardPress(DIK_G))
-			{
-				// 攻撃モードスウィッチ音再生
-				g_pSE2 = LoadSound(14);
-				if (IsPlaying(g_pSE2))
-					g_pSE2->SetCurrentPosition(0);
-				else {
-					PlaySound(g_pSE2, E_DS8_FLAG_NONE);
-				}
-				player->direction = -1;
-			}
+			//if (GetKeyboardPress(DIK_F))
+			//{
+			//	// 攻撃モードに変換				
+			//	player->direction = 1;
+			//}
+			//if (GetKeyboardPress(DIK_T))
+			//{
+			//	// 召喚モードに変換					
+			//	player->direction = -1;
+			//}
 			// ゲームパッドでで移動処理
 			//if (IsButtonPressed(0, BUTTON_DOWN))
 			//{
@@ -337,29 +396,27 @@ void UpdatePlayer(void)
 			//}
 
 			//弾発射
-			if (GetKeyboardPress(DIK_SPACE) && (bullet_cooldown == 0) && player->direction == 1)
+			if (GetKeyboardPress(DIK_SPACE) && (player->bullet_cooldown == 0) && player->direction == 1)
 			{
-				bullet_cooldown += 5;
+				player->bullet_cooldown += 20;
 				D3DXVECTOR3 pos = player->pos;
+				//pos.x += TEXTURE_PLAYER_SIZE_X / 2;
+				//pos.y -= TEXTURE_BULLET_SIZE_Y;
+				pos.y -= TEXTURE_PLAYER_SIZE_Y;
+				pos.x += TEXTURE_PLAYER_SIZE_X/2 + player->pos.x / 4.0f;
 				SetBullet(pos, player->rot.z, player->status.ATK);
-			}
-			//else if (IsButtonTriggered(0, BUTTON_B))
-			//{
-			//	bullet_cooldown += 5;
-			//	D3DXVECTOR3 pos = player->pos;
-			//	SetBullet(pos, player->rot.z, player->status.ATK);
-			//}
-
+			}			
 			// 移動後の座標で頂点を設定
 			SetVertexPlayer(i, player->direction);
-			if (bullet_cooldown > 0)
-				bullet_cooldown--;
-
-			//if (player->rot.z > 2 * M_PI)
-			//	player->rot.z = player->rot.z - 2 * M_PI;
-			//
-			//if (player->rot.z < -2 * M_PI)
-			//	player->rot.z = -player->rot.z - 2 * M_PI;
+			if (player->bullet_cooldown > 0)
+				player->bullet_cooldown--;
+			if (player->skill1_cooldown > 0)
+				player->skill1_cooldown--;
+			if (player->skill2_cooldown > 0)
+				player->skill2_cooldown--;
+			if (player->skill3_cooldown > 0)
+				player->skill3_cooldown--;
+			overlap = false;
 		}
 	}
 }

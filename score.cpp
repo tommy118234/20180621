@@ -53,7 +53,7 @@ HRESULT InitScore(int type)
 	}
 
 	g_posScore = D3DXVECTOR3((float)SCORE_POS_X, (float)SCORE_POS_Y, 0.0f);
-	g_nScore = 3000;//114514;
+	g_nScore = 5114;//114514;
 
 	// í∏ì_èÓïÒÇÃçÏê¨
 	MakeVertexScore();

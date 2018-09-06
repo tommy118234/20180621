@@ -39,13 +39,12 @@ void	Update(void);
 void	Draw(void);
 void	CheckHit(void);
 bool	CheckHitBB(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, D3DXVECTOR2 size1, D3DXVECTOR2 size2);
+void	DrawCircleFilled(float mx, float my, float r);
 //bool	CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float size1, float size2);
+//bool	CheckHitOBB(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, D3DXVECTOR2 size1, D3DXVECTOR2 size2);
+void	InitGame(void);
 
-void InitGame(void);
-
-#ifdef _DEBUG
 void DrawDebugFont(void);
-#endif
 
 //*****************************************************************************
 // グローバル変数:
@@ -53,16 +52,14 @@ void DrawDebugFont(void);
 LPDIRECT3D9				g_pD3D = NULL;				// Direct3Dオブジェクト
 LPDIRECT3DDEVICE9		g_pD3DDevice = NULL;		// Deviceオブジェクト(描画に必要)
 
-#ifdef _DEBUG
 LPD3DXFONT				g_pD3DXFont = NULL;			// フォントへのポインタ
 int						g_nCountFPS;				// FPSカウンタ
-#endif
+
 
 int						g_nStage = 0;				// ステージ番号
 LPDIRECTSOUNDBUFFER8	g_pBGM;						// BGM用バッファ
 LPDIRECTSOUNDBUFFER8	g_pSE0;						// SE用バッファ
 int                     page = 1;					// ステージサブ番号
-
 //=============================================================================
 // メイン関数
 //=============================================================================
@@ -149,9 +146,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 			if ((dwCurrentTime - dwFPSLastTime) >= 1000)	// 1秒ごとに実行
 			{
-#ifdef _DEBUG
+
 				g_nCountFPS = dwFrameCount;					//表示するために保存する
-#endif
+
 				dwFPSLastTime = dwCurrentTime;				// FPSを測定した時刻を保存
 				dwFrameCount = 0;							// カウントをクリア
 			}
@@ -301,11 +298,11 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	g_pD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);	// テクスチャ縮小時の補間設定
 
 
-#ifdef _DEBUG
+
 																			// 情報表示用フォントを設定
 	D3DXCreateFont(g_pD3DDevice, 18, 0, 0, 0, FALSE, SHIFTJIS_CHARSET,
 		OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("Terminal"), &g_pD3DXFont);
-#endif
+
 
 	// サウンド初期化
 	InitSound(hWnd);
@@ -320,7 +317,7 @@ HRESULT Init(HWND hWnd, BOOL bWindow)
 	// バレットの初期化処理
 	InitBullet(0);
 	// SERVANTの初期化処理
-	InitSERVANT(0);
+	InitServant(0);
 	// Beamの初期化処理
 	InitBeam(0);
 	// Beamの初期化処理
@@ -351,7 +348,7 @@ void Uninit(void)
 	// バレットの終了処理
 	UninitBullet();
 	// SERVANTの終了処理
-	UninitSERVANT();
+	UninitServant();
 	// BG終了処理
 	UninitBG();
 	// Beam終了処理
@@ -445,7 +442,7 @@ void Update(void)
 		// プレイヤーの更新処理
 		UpdatePlayer();
 		// SERVANTの更新処理
-		UpdateSERVANT();
+		UpdateServant();
 		// バレットの更新処理
 		UpdateBullet();
 		// Beamの更新処理
@@ -485,11 +482,15 @@ void Update(void)
 //=============================================================================
 void Draw(void)
 {
+
+
+	PLAYER *player = GetPlayer(0);
 	// バックバッファ＆Ｚバッファのクリア
 	g_pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(128, 128, 255, 0), 1.0f, 0);	
 	// Direct3Dによる描画の開始
 	if(SUCCEEDED(g_pD3DDevice->BeginScene()))
 	{
+
 		// 画面遷移
 		switch (g_nStage)
 		{
@@ -510,7 +511,7 @@ void Draw(void)
 			// プレイヤーの描画処理
 			DrawPlayer();
 			// SERVANTの描画処理
-			DrawSERVANT();
+			DrawServant();
 			// Beamの描画処理
 			DrawItem();
 			// バレットの描画処理
@@ -530,10 +531,10 @@ void Draw(void)
 			DrawResult();
 			break;
 		}
-#ifdef _DEBUG
+
 		// バッグ表示
 		DrawDebugFont();
-#endif
+
 		// Direct3Dによる描画の終了
 		g_pD3DDevice->EndScene();
 	}
@@ -549,7 +550,7 @@ LPDIRECT3DDEVICE9 GetDevice(void)
 	return(g_pD3DDevice);
 }
 
-#ifdef _DEBUG
+
 //=============================================================================
 // FPS表示処理
 //=============================================================================
@@ -563,18 +564,52 @@ void DrawDebugFont(void)
 
 	BEAM *beam = GetBeam(0);
 	BULLET *bullet = GetBullet(0);
-	SERVANT *servant = GetSERVANT(0);
+	SERVANT *servant = GetServant(0);
+
+	ITEM *item = GetItem(0);				// Itemのポインターを初期化
 	
 	// テキスト描画
 	//sprintf(str, _T("FPS:%d"), g_nCountFPS);
 	//g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0xff, 0xff, 0xff));
-	sprintf(str, "P_HP:%d P_MP:%d, P_ATK:%d", player->status.HP , player->status.MP, player->status.ATK);
-	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0, 0, 0));
-	rect.top = 20;
-	sprintf(str, "E_HP:%d,E_DEF:%d", enemy->status.HP,enemy->status.DEF);
-	g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 0, 0, 0));	
+	if (g_nStage == STAGE_GAME)
+	{
+		rect.top = 0;
+		sprintf(str, "ENEMY_HP:%d E_ATK:%d E_DEF:%d", enemy->status.HP, enemy->status.ATK, enemy->status.DEF);
+		g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_RIGHT, D3DCOLOR_ARGB(255, 0, 0, 0));
+		//rect.top = 20;
+		sprintf(str, "P_HP:%d P_MP:%d, P_ATK:%d,P_DEF:%d", player->status.HP, player->status.MP, player->status.ATK, player->status.DEF);
+		g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(255, 0, 0, 0));
+	}
+	//rect.top = 20;
+	//
+	//sprintf(str, "gravity:%d acc:%d, P_X:%f,P_Y:%f", player->gravity, player->acceleration, player->pos.x, player->pos.y);
+	//g_pD3DXFont->DrawText(NULL, str, -1, &rect, DT_LEFT, D3DCOLOR_ARGB(0xff, 255, 0, 0));
+	
+
+	// Show BC Area by Circle Shading
+	//if (g_nStage == STAGE_GAME) {
+	//	DrawCircleFilled(player->pos.x, player->pos.y, player->Radius);
+	//	DrawCircleFilled(enemy->pos.x, enemy->pos.y, enemy->Radius);
+	//
+	//	for (int i = 0; i < BULLET_MAX; i++, bullet++)
+	//	{
+	//		DrawCircleFilled(bullet->pos.x, bullet->pos.y, bullet->Radius);
+	//	}
+	//	for (int i = 0; i < BEAM_MAX; i++, beam++)
+	//	{
+	//		DrawCircleFilled(beam->pos.x, beam->pos.y, beam->Radius);
+	//	}
+	//	for (int i = 0; i < ITEM_MAX; i++, item++)
+	//	{
+	//		DrawCircleFilled(item->pos.x, item->pos.y, item->Radius);
+	//	}
+	//	for (int i = 0; i < SERVANT_MAX; i++, servant++)
+	//	{
+	//		DrawCircleFilled(servant->pos.x, servant->pos.y, servant->Radius);
+	//	}
+	//}
 }
-#endif
+
 //=============================================================================
 // 画面遷移
 //=============================================================================
@@ -607,28 +642,27 @@ void CheckHit(void)
 	BULLET *bullet = GetBullet(0);			// バレットのポインターを初期化
 	BEAM *beam = GetBeam(0);				// Beamのポインターを初期化
 	ITEM *item = GetItem(0);				// Itemのポインターを初期化
-	SERVANT *servant = GetSERVANT(0);		// エネミーのポインターを初期化	
+	SERVANT *servant = GetServant(0);		// エネミーのポインターを初期化	
 	int cnt = 0;							// 敵の数を数える
-
-	D3DXVECTOR3 temp = enemy->pos;
-	temp.x -= GetPlayer(0)->pos.x / 4.0f;
-	// 自分とITEM(BC)
-	player = GetPlayer(0);					// エネミーのポインターを初期化	
+	   
+	// 自分とITEM(BC)	
 	for (int j = 0; j < PLAYER_MAX; j++, player++)
 	{
 		if (player->use == false) continue;
 		for (int i = 0; i < ITEM_MAX; i++, item++)
 		{
 			if (item->use == false) continue;
+			//if (CheckHitBC(item->pos, player->pos, item_rad, player_rad))		
 
-			if (CheckHitBC(item->pos, player->pos, TEXTURE_ITEM_SIZE_X, TEXTURE_PLAYER_SIZE_Y))
-			//if (CheckHitBB(item->pos, player->pos, D3DXVECTOR2(TEXTURE_BEAM_SIZE_X, TEXTURE_BEAM_SIZE_Y), D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y)))
+			if (CheckHitBC(item->pos, player->pos, item->Radius,player->Radius))
+			//if (CheckHitBB(item->pos, player->pos, D3DXVECTOR2(TEXTURE_ITEM_SIZE_X, TEXTURE_ITEM_SIZE_Y), D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y)))
 			{
 				//Item音再生
 				g_pSE0 = LoadSound(15);
 				if (IsPlaying(g_pSE0))
 					g_pSE0->SetCurrentPosition(0);
-				else {
+				else 
+				{
 					PlaySound(g_pSE0, E_DS8_FLAG_NONE);
 				}
 				item->use = false;
@@ -646,35 +680,39 @@ void CheckHit(void)
 			}			
 		}
 	}	
-	// 敵と操作キャラ(BB)
-	//for (int i = 0; i < ENEMY_MAX; i++, enemy++)
-	//{
-	//	if (enemy->use == false)	continue;
-	//
-	//	//if (CheckHitBC(player->pos, enemy->pos, TEXTURE_PLAYER_SIZE_X, TEXTURE_ENEMY_SIZE_X))
-	//	if (CheckHitBB(player->pos, temp, D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
-	//	{			
-	//		player->status.HP -= 100;
-	//	}
-	//}
 
-	// ボスと弾(BC) // bullet(heavy) inside loop, enemy(light) outer loop
-	enemy = GetEnemy(0);					// エネミーのポインターを初期化
-
+	//enemy = GetEnemy(0);
 	player = GetPlayer(0);
+	// 敵と操作キャラ(BB)
+	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
+	{
+		if (enemy->use == false)	continue;	
+		//if (CheckHitBC(player->pos, enemy->pos, player_rad,enemy_rad))
+		if (CheckHitBC(player->pos, enemy->pos, player->Radius, enemy->Radius/2))
+		//if (CheckHitBB(player->pos, temp, D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
+		{			
+			player->status.HP -= 100;
+			player->pos = D3DXVECTOR3(SCREEN_WIDTH / 2 - TEXTURE_PLAYER_SIZE_X / 2, SCREEN_HEIGHT - TEXTURE_PLAYER_SIZE_Y, 0.0f);
+		}
+	}
+
+	// ボスと弾(BC) // bullet(heavy) inner loop, enemy(light) outer loop
+	enemy = GetEnemy(0);					// エネミーのポインターを初期化
 	for (int j = 0; j < ENEMY_MAX; j++, enemy++)
 	{
 		if (enemy->use == false) continue;
 		for (int i = 0; i < BULLET_MAX; i++, bullet++)
 		{
 		    if (bullet->use == false) continue;
-		    //if (CheckHitBC(bullet->pos, enemy->pos, TEXTURE_BULLET_SIZE_X, TEXTURE_ENEMY_SIZE_X))
-		    if (CheckHitBB(bullet->pos, temp , D3DXVECTOR2(TEXTURE_BULLET_SIZE_X, TEXTURE_BULLET_SIZE_Y), D3DXVECTOR2(TEXTURE_ENEMY_SIZE_X, TEXTURE_ENEMY_SIZE_Y)))
+			if (CheckHitBC(bullet->pos, enemy->pos, bullet->Radius, enemy->Radius/2))
 		    {
 		    	bullet->use = false;		// 弾の消滅処理を行い
+				//敵HP減少アニメ
+
+
+
 				if(bullet->atk - enemy->status.DEF>0)
 		    	enemy->status.HP -= (bullet->atk - enemy->status.DEF);	// 敵HP減少処理
-		    	//AddScore(50);			// スコア計算
 		    	if (enemy->status.HP < 1)
 		    	{
 		    		enemy->use = false;		// 敵は倒される							
@@ -682,6 +720,8 @@ void CheckHit(void)
 		    }
 		}
 	}	
+
+
 	// 自分と敵のBeam(BB)
 	player = GetPlayer(0);					// 操作キャラクターのポインターを初期化	
 	for (int j = 0; j < PLAYER_MAX; j++, player++)
@@ -690,37 +730,36 @@ void CheckHit(void)
 		for (int i = 0; i < BEAM_MAX; i++, beam++)
 		{
 			if (beam->use == false) continue;
-			if (CheckHitBC(beam->pos, player->pos, TEXTURE_BEAM_SIZE_X, TEXTURE_PLAYER_SIZE_X))
-			//if (CheckHitBB(beam->pos, player->pos, D3DXVECTOR2(TEXTURE_BEAM_SIZE_X, TEXTURE_BEAM_SIZE_Y), D3DXVECTOR2(TEXTURE_PLAYER_SIZE_X, TEXTURE_PLAYER_SIZE_Y)))
+			if (CheckHitBC(beam->pos, player->pos, beam->Radius, player->Radius/2))
 			{
 				beam->use = false;			// 敵のBeamの消滅処理を行い
 				if (beam->atk - player->status.DEF>0)
-				player->status.HP -= beam->atk - player->status.DEF;	// 操作キャラクターHP減少処理
-				if (player->status.HP < 1)
-				{
-					player->use = false;	// 操作キャラクターは死に										
-				}			
+				player->status.HP -= beam->atk - player->status.DEF;	// 操作キャラクターHP減少処理					
 			}
 		}		
 	}
+
+
 	// Servantと敵のBeam(BB)
-	beam = GetBeam(0);						// Beamのポインターを初期化
+	servant = GetServant(0);
 	for (int j = 0; j < SERVANT_MAX; j++, servant++)
 	{
-		if (servant->use == false) continue;
-		D3DXVECTOR3 temp = servant->pos;
-		temp.x -= GetPlayer(0)->pos.x / 4.0f;
+		
+		if (servant->use == false) continue;		
+		beam = GetBeam(0);						// Beamのポインターを初期化
 		for (int i = 0; i < BEAM_MAX; i++, beam++)
 		{
-			if (beam->use == false) continue;
-			if (CheckHitBC(beam->pos, temp, TEXTURE_BEAM_SIZE_X, TEXTURE_SERVANT_SIZE_X))
-			//if (CheckHitBB(beam->pos, temp, D3DXVECTOR2(TEXTURE_BEAM_SIZE_X, TEXTURE_BEAM_SIZE_Y), D3DXVECTOR2(TEXTURE_SERVANT_SIZE_X, TEXTURE_SERVANT_SIZE_Y)))
+			//if (beam->use == false) continue;
+			if (CheckHitBC(beam->pos, servant->pos, beam->Radius, servant->Radius/2))
 			{
-				beam->use = false;		// Beamの消滅処理を行い
+				//beam->use = false;		// Beamの消滅処理を行い
 				servant->use = false;
 			}
+			//if (!servant->use)
+			//	beam->use = false;
 		}
 	}
+	
 	// 敵が全滅したら画面遷移
 	enemy = GetEnemy(0);					// エネミーのポインターを初期化
 	for (int i = 0; i < ENEMY_MAX; i++, enemy++)
@@ -739,7 +778,7 @@ void CheckHit(void)
 		SwitchBG(5);
 	}
 	player = GetPlayer(0);
-	if (player->use == false)
+	if (player->use == false || player->status.HP < 0)
 	{
 		// End 2 負けた
 		SetBGM(8);
@@ -791,6 +830,28 @@ bool CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float radius1, float radius2
 }
 
 //=============================================================================
+// OBBによる当たり判定処理
+// 回転は考慮します
+// 戻り値：当たってたらtrue
+//=============================================================================
+//bool CheckHitOBB(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, D3DXVECTOR2 size1, D3DXVECTOR2 size2)
+//{
+//	size1 /= 2.0f;	// 半サイズにする
+//	size2 /= 2.0f;	// 同上
+//
+//	if (pos1.x + size1.x > pos2.x - size2.x && pos2.x + size2.x > pos1.x - size1.x &&
+//		pos1.y + size1.y > pos2.y - size2.y && pos2.y + size2.y > pos1.y - size1.y)
+//	{
+//		return true;
+//	}
+//
+//	return false;
+//}
+
+
+
+
+//=============================================================================
 // ゲームの再初期化処理処理
 // 戻り値：無し
 //=============================================================================
@@ -800,11 +861,28 @@ void InitGame(void)
 	InitBeam(1);		// Beamの再初期化
 	InitItem(1);		// Beamの再初期化
 	InitBullet(1);		// バレットの再初期化
-	InitSERVANT(1);		// バレットの再初期化
-	InitEnemy(1);		// エネミーの再初期化
+	InitServant(1);		// バレットの再初期化
+	//InitEnemy(1);		// エネミーの再初期化
 	InitPlayer(1);		// プレイヤーの再初期化	
 	InitResult();	
 	//InitScore(1);		// スコアの再初期化		
 	InitTitle();		// プレイヤーの再初期化	
 	page = 1;
+}
+
+void DrawCircleFilled(float mx, float my, float r)
+{
+	VERTEX_2D_DIF verts[65];
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	for (int i = 0; i < 64 + 1; i++)
+	{
+		verts[i].x = mx + r * cos(D3DX_PI*(i / (64 / 2.0f)));
+		verts[i].y = my + r * sin(D3DX_PI*(i / (64 / 2.0f)));
+		verts[i].z = 0;
+		verts[i].rhw = 1;
+		verts[i].color = D3DCOLOR_RGBA(155, 155, 155, 255);
+	}
+	// 頂点フォーマットの設定
+	pDevice->SetFVF(FVF_VERTEX_2D);
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 64 - 1, &verts, sizeof(VERTEX_2D_DIF));
 }

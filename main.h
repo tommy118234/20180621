@@ -66,6 +66,14 @@ typedef struct
 	D3DXVECTOR2 tex;		// テクスチャ座標
 }	VERTEX_2D;
 
+// 上記頂点フォーマットに合わせた構造体を定義
+typedef struct
+{
+	float x, y, z, rhw;
+	D3DCOLOR color;
+	static const DWORD FVF = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
+}	VERTEX_2D_DIF;
+
 // 画面遷移定数
 enum E_STAGE
 {

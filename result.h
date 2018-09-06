@@ -9,10 +9,10 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define	TEXTURE_RESULT		_T("data/BG/moon_red.png")					// 読み込むテクスチャファイル名
-#define	TEXTURE_RESULT2		_T("data/BG/moon_red2.png")					// 読み込むテクスチャファイル名
-#define	TEXTURE_RESULT3		_T("data/BG/moon_ice.png")					// 読み込むテクスチャファイル名
-#define	TEXTURE_RESULT_LOGO	_T("data/TEXTURE/title_ice.png")			// 読み込むテクスチャファイル名
+#define	TEXTURE_RESULT		_T	("data/BG/moon_red.png")				// 読み込むテクスチャファイル名
+#define	TEXTURE_RESULT2		_T	("data/BG/moon_red2.png")				// 読み込むテクスチャファイル名
+#define	TEXTURE_RESULT3		_T	("data/BG/moon_ice.png")				// 読み込むテクスチャファイル名
+#define	TEXTURE_RESULT_LOGO	_T	("data/TEXTURE/title_ice.png")			// 読み込むテクスチャファイル名
 #define	RESULT_POS_X			(0)										// タイトルの表示位置
 #define	RESULT_POS_Y			(0)										// タイトルの表示位置
 #define	RESULT_SIZE_X			(800)									// タイトルの幅
@@ -28,5 +28,4 @@ HRESULT InitResult(void);
 void UninitResult(void);
 void UpdateResult(void);
 void DrawResult(void);
-
 #endif

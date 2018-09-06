@@ -18,7 +18,14 @@
 #define ANIM_PATTERN_NUM_SERVANT		(TEXTURE_PATTERN_DIVIDE_X_SERVANT*TEXTURE_PATTERN_DIVIDE_Y_SERVANT)	// アニメーションパターン数
 #define TIME_ANIMATION_SERVANT			(50)						// アニメーションの切り替わるカウント
 #define SERVANT_MAX						(10)						// Servantの最大数
-#define SERVANT_SPEED					(6.0f)						// Servantの移動スピード
+
+
+#define SERVANT_ATK_A					(75)							// Servantの攻撃力
+#define SERVANT_COOLDOWN_A				(50)						// Servantのリロードスピード
+#define SERVANT_ATK_B					(100)							// Servantの攻撃力
+#define SERVANT_COOLDOWN_B				(70)						// Servantのリロードスピード
+#define SERVANT_ATK_C					(250)							// Servantの攻撃力
+#define SERVANT_COOLDOWN_C				(100)						// Servantのリロードスピード
 /*******************************************************************************
 * 構造体定義
 ********************************************************************************/
@@ -33,16 +40,18 @@ typedef struct					// Servantの構造体
 	LPDIRECT3DTEXTURE9		Texture = NULL;			// テクスチャへのポリゴン
 	VERTEX_2D				vertexWk[NUM_VERTEX];	// 頂点情報格納ワーク
 	float					Radius;					// ポリゴンの半径
-	float					BaseAngle;		// ポリゴンの角度	
-	int						bullet_cooldown = 50;
+	float					BaseAngle;				// ポリゴンの角度	
+	int						bullet_cooldown;
+	int						bullet_count;
+	D3DXVECTOR3				abs_pos;				// ポリゴンの移動量
 } SERVANT;
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitSERVANT(int type);
-void UninitSERVANT(void);
-void UpdateSERVANT(void);
-void DrawSERVANT(void);
-void SetSERVANT(D3DXVECTOR3 pos, int type);
-SERVANT *GetSERVANT(int pno);	// プレイヤーの(アドレス)を取得
+HRESULT InitServant(int type);
+void UninitServant(void);
+void UpdateServant(void);
+void DrawServant(void);
+void SetServant(D3DXVECTOR3 pos, int type);
+SERVANT *GetServant(int pno);	// プレイヤーの(アドレス)を取得
 #endif

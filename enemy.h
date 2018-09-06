@@ -34,6 +34,7 @@ typedef struct					// エネミー構造体
 	float					Radius;							// ポリゴンの半径
 	float					BaseAngle = 0.0;				// ポリゴンの角度
 	int						mode;
+	D3DXVECTOR3				abs_pos;
 } ENEMY;
 //*****************************************************************************
 // プロトタイプ宣言

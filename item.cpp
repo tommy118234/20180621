@@ -1,6 +1,6 @@
 /*******************************************************************************
 * タイトル:		DirectXゲーム～はじめての個人作品～
-* プログラム名:	バレット処理 [item.cpp]
+* プログラム名:	Item処理 [item.cpp]
 * 作成者:		GP11B 16　徐　ワイ延
 * 作成開始日:	2018/07/24
 ********************************************************************************/
@@ -25,7 +25,7 @@ void SetVertexItem(int no);
 // グローバル変数
 //*****************************************************************************
 LPDIRECT3DTEXTURE9		g_pD3DTextureItem = NULL;		// テクスチャへのポリゴン
-ITEM					itemWk[ITEM_MAX];			// バレット構造体
+ITEM					itemWk[ITEM_MAX];			// Item構造体
 
 
 //=============================================================================
@@ -60,7 +60,7 @@ HRESULT InitItem(int type)
 
 
 		item->BaseAngle = atan2f(TEXTURE_ITEM_SIZE_Y, TEXTURE_ITEM_SIZE_X);
-		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_ITEM_SIZE_X / 2, TEXTURE_ITEM_SIZE_Y / 2);
+		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_ITEM_SIZE_X , TEXTURE_ITEM_SIZE_Y);
 		item->Radius = D3DXVec2Length(&temp);
 
 		item->Texture = g_pD3DTextureItem;					// テクスチャ情報
@@ -86,15 +86,15 @@ void UninitItem(void)
 void UpdateItem(void)
 {
 
-	ITEM *item = itemWk;			// バレットのポインターを初期化
+	ITEM *item = itemWk;				// Itemのポインターを初期化
 
 	for (int i = 0; i < ITEM_MAX; i++, item++)
 	{
-		if (item->use == true)			// 未使用状態のバレットを見つける
+		if (item->use == true)			// 未使用状態のItemを見つける
 		{			
 			// 画面外まで進んだ？
 			if (item->pos.y < -TEXTURE_ITEM_SIZE_Y || item->pos.y > SCREEN_HEIGHT
-				|| item->pos.x < -TEXTURE_ITEM_SIZE_X || item->pos.x > SCREEN_WIDTH)
+			|| item->pos.x < -TEXTURE_ITEM_SIZE_X || item->pos.x > SCREEN_WIDTH)
 			{
 				item->use = false;
 				//item->Texture = NULL;					// テクスチャ情報
@@ -112,7 +112,7 @@ void UpdateItem(void)
 void DrawItem(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	ITEM *item = itemWk;				// バレットのポインターを初期化
+	ITEM *item = itemWk;				// Itemのポインターを初期化
 
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
@@ -161,22 +161,24 @@ HRESULT MakeVertexItem(int no)
 //=============================================================================
 void SetVertexItem(int no)
 {
-	ITEM *item = &itemWk[no];			// バレットのポインターを初期化
+	ITEM *item = &itemWk[no];			// Itemのポインターを初期化
 
 	// 頂点座標の設定	
-	item->vertexWk[0].vtx.x = item->pos.x - cosf(item->BaseAngle + item->rot.z) * item->Radius - GetPlayer(0)->pos.x / 4.0f;
+	item->pos.x = item->abs_pos.x - GetPlayer(0)->pos.x / 4.0f;
+
+	item->vertexWk[0].vtx.x = item->pos.x - cosf(item->BaseAngle + item->rot.z) * item->Radius;
 	item->vertexWk[0].vtx.y = item->pos.y - sinf(item->BaseAngle + item->rot.z) * item->Radius;
 	item->vertexWk[0].vtx.z = 0.0f;
 	
-	item->vertexWk[1].vtx.x = item->pos.x + cosf(item->BaseAngle - item->rot.z) * item->Radius - GetPlayer(0)->pos.x / 4.0f;
+	item->vertexWk[1].vtx.x = item->pos.x + cosf(item->BaseAngle - item->rot.z) * item->Radius;
 	item->vertexWk[1].vtx.y = item->pos.y - sinf(item->BaseAngle - item->rot.z) * item->Radius;
 	item->vertexWk[1].vtx.z = 0.0f;
 	
-	item->vertexWk[2].vtx.x = item->pos.x - cosf(item->BaseAngle - item->rot.z) * item->Radius - GetPlayer(0)->pos.x / 4.0f;
+	item->vertexWk[2].vtx.x = item->pos.x - cosf(item->BaseAngle - item->rot.z) * item->Radius;
 	item->vertexWk[2].vtx.y = item->pos.y + sinf(item->BaseAngle - item->rot.z) * item->Radius;
 	item->vertexWk[2].vtx.z = 0.0f;
 	
-	item->vertexWk[3].vtx.x = item->pos.x + cosf(item->BaseAngle + item->rot.z) * item->Radius - GetPlayer(0)->pos.x / 4.0f;
+	item->vertexWk[3].vtx.x = item->pos.x + cosf(item->BaseAngle + item->rot.z) * item->Radius;
 	item->vertexWk[3].vtx.y = item->pos.y + sinf(item->BaseAngle + item->rot.z) * item->Radius;
 	item->vertexWk[3].vtx.z = 0.0f;
 }
@@ -185,7 +187,7 @@ void SetVertexItem(int no)
 //=============================================================================
 void SetTextureItem(int no, int cntPattern)
 {
-	ITEM *item = &itemWk[no];			// バレットのポインターを初期化
+	ITEM *item = &itemWk[no];			// Itemのポインターを初期化
 
 	// テクスチャ座標の設定
 	int x = cntPattern % TEXTURE_PATTERN_DIVIDE_X_ITEM;
@@ -200,21 +202,22 @@ void SetTextureItem(int no, int cntPattern)
 }
 
 //=============================================================================
-// バレットの発射設定
+// Itemの発射設定
 //=============================================================================
 void SetItem(D3DXVECTOR3 pos, int type)
 {
 
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	ITEM *item = &itemWk[0];			// バレットのポインターを初期化
+	ITEM *item = &itemWk[0];			// Itemのポインターを初期化
 
 	// もし未使用の弾が無かったら発射しない( =これ以上撃てないって事 )
 	for (int i = 0; i < ITEM_MAX; i++, item++)
 	{
-		if (item->use == false)			// 未使用状態のバレットを見つける
+		if (item->use == false)			// 未使用状態のItemを見つける
 		{
 			item->use = true;				// 使用状態へ変更する
 			item->pos = pos;				// 座標をセット
+			item->abs_pos = pos;				// 座標をセット
 			switch (type) {
 			case 0:
 				item->type = 1;

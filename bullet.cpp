@@ -9,6 +9,7 @@
 #include "player.h"
 #include "bullet.h"
 #include "sound.h"
+#include "input.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -49,7 +50,7 @@ HRESULT InitBullet(int type)
 			//g_pSE = LoadSound(SE_00);
 		}
 		else if (type == 1) {
-			UninitBullet;
+			UninitBullet();
 		}						
 		bullet->use = FALSE;									// 未使用（発射されていない弾）
 		bullet->pos = D3DXVECTOR3(-100.0f, 0.0f, 0.0f);			// 座標データを初期化
@@ -87,23 +88,27 @@ void UninitBullet(void)
 void UpdateBullet(void)
 {
 	BULLET *bullet = bulletWk;			// バレットのポインターを初期化
-	
+
+	float abs = GetPlayer(0)->pos.x / 4.0f;
 	for (int i = 0; i < BULLET_MAX; i++, bullet++)
 	{		
 		if (bullet->use == true)			// 未使用状態のバレットを見つける
 		{
 			// バレットの移動処理
-			bullet->pos.x -= BULLET_SPEED * (-sinf(bullet->BaseAngle + bullet->rot.z) + cosf(bullet->BaseAngle + bullet->rot.z));
-			bullet->pos.y -= BULLET_SPEED * (cosf(bullet->BaseAngle + bullet->rot.z) + sinf(bullet->BaseAngle + bullet->rot.z));
+			//bullet->pos.x -= BULLET_SPEED * (-sinf(bullet->BaseAngle + bullet->rot.z) + cosf(bullet->BaseAngle + bullet->rot.z));
+			//bullet->pos.y -= BULLET_SPEED * (cosf(bullet->BaseAngle + bullet->rot.z) + sinf(bullet->BaseAngle + bullet->rot.z));
+
+			bullet->abs_pos.x -= BULLET_SPEED * (-sinf(bullet->BaseAngle + bullet->rot.z) + cosf(bullet->BaseAngle + bullet->rot.z));
+			bullet->abs_pos.y -= BULLET_SPEED * (cosf(bullet->BaseAngle + bullet->rot.z) + sinf(bullet->BaseAngle + bullet->rot.z));
+			
 			// 画面外まで進んだ？
-			if (bullet->pos.y < -TEXTURE_BULLET_SIZE_Y || bullet->pos.y > SCREEN_HEIGHT
-				|| bullet->pos.x < -TEXTURE_BULLET_SIZE_X || bullet->pos.x > SCREEN_WIDTH)
+			if (bullet->abs_pos.y < -TEXTURE_BULLET_SIZE_Y || bullet->abs_pos.y > SCREEN_HEIGHT
+				|| bullet->abs_pos.x < -TEXTURE_BULLET_SIZE_X || bullet->abs_pos.x > SCREEN_WIDTH)
 			{
 				bullet->use = false;
-				bullet->Texture = NULL;					// テクスチャ情報
+				bullet->Texture = NULL;					// テクスチャ情報2
 				bullet->Texture = g_pD3DTextureBullet;	// テクスチャ情報				
-				bullet->pos.x = -100.0f;
-				//bullet->pos = D3DXVECTOR3(player->pos.x + TEXTURE_BULLET_SIZE_X / 2, player->pos.y, 0.0f);
+				bullet->abs_pos.x = -100.0f;
 			}
 			SetVertexBullet(i);
 		}		
@@ -165,8 +170,10 @@ HRESULT MakeVertexBullet(int no)
 void SetVertexBullet(int no)
 {	
 	BULLET *bullet = &bulletWk[no];			// バレットのポインターを初期化
-
 	// 頂点座標の設定	
+	bullet->pos.y = bullet->abs_pos.y;
+	bullet->pos.x = bullet->abs_pos.x - GetPlayer(0)->pos.x / 4.0f;
+
 	bullet->vertexWk[0].vtx = D3DXVECTOR3(bullet->pos.x - cosf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
 										  bullet->pos.y - sinf(bullet->BaseAngle + bullet->rot.z) * bullet->Radius,
 										  0);
@@ -217,8 +224,9 @@ void SetBullet(D3DXVECTOR3 pos, float rot, int atk)
 			bullet->pos = pos;				// 座標をセット
 			bullet->rot.z = rot;
 			bullet->atk = atk;
-			g_pSE = LoadSound(SE_01);
+			bullet->abs_pos = pos;
 			// 発射音再生
+			g_pSE = LoadSound(SE_01);
 			if (IsPlaying(g_pSE))
 				g_pSE->SetCurrentPosition(0);
 			else {

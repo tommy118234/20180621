@@ -1,24 +1,22 @@
 /*******************************************************************************
 * タイトル:		DirectXゲーム～はじめての個人作品～
-* プログラム名:	Beam処理 [bullet.h]
+* プログラム名:	Beam処理 [beam.h]
 * 作成者:		GP11B 16　徐　ワイ延
 * 作成開始日:	2018/07/24
 ********************************************************************************/
 #ifndef _BEAM_H_
 #define _BEAM_H_
-
 // マクロ定義
 #define	NUM_BEAM						(2)			// ポリゴン数
 #define TEXTURE_GAME_BEAM				_T("data/TEXTURE/beam.png")	// サンプル用画像
-#define TEXTURE_BEAM_SIZE_X				(20)		// テクスチャサイズ
-#define TEXTURE_BEAM_SIZE_Y				(20)		// 同上
+#define TEXTURE_BEAM_SIZE_X				(10)		// テクスチャサイズ
+#define TEXTURE_BEAM_SIZE_Y				(10)		// 同上
 #define TEXTURE_PATTERN_DIVIDE_X_BEAM	(1)			// アニメパターンのテクスチャ内分割数（X)
 #define TEXTURE_PATTERN_DIVIDE_Y_BEAM	(1)			// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM_BEAM			(TEXTURE_PATTERN_DIVIDE_X_BEAM*TEXTURE_PATTERN_DIVIDE_Y_BEAM)	// アニメーションパターン数
 #define TIME_ANIMATION_BEAM				(50)		// アニメーションの切り替わるカウント
-
-#define BEAM_MAX						(50)		// Beamの最大数
-#define BEAM_SPEED						(5.0f)		// Beamの移動スピード
+#define BEAM_MAX						(100)		// Beamの最大数
+#define BEAM_SPEED						(3.0f)		// Beamの移動スピード
 /*******************************************************************************
 * 構造体定義
 ********************************************************************************/
@@ -34,7 +32,8 @@ typedef struct										// Beamの構造体
 	float					Radius;					// ポリゴンの半径
 	float					BaseAngle;				// ポリゴンの角度	
 	int						atk;
-} BEAM;
+	D3DXVECTOR3				abs_pos;
+}	BEAM;
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -43,5 +42,5 @@ void	UninitBeam(void);
 void	UpdateBeam(void);
 void	DrawBeam(void);
 void	SetBeam(D3DXVECTOR3 pos, float rot, int ATK);
-BEAM	*GetBeam(int pno);							// Beamの(アドレス)を取得
+BEAM	*GetBeam(int pno);							 // Beamの(アドレス)を取得
 #endif

@@ -14,13 +14,13 @@
 #define TEXTURE_GAME_ITEM				_T("data/TEXTURE/item1.png")	// サンプル用画像
 #define TEXTURE_GAME_ITEM2				_T("data/TEXTURE/item2.png")	// サンプル用画像
 #define TEXTURE_GAME_ITEM3				_T("data/TEXTURE/item3.png")	// サンプル用画像
-#define TEXTURE_ITEM_SIZE_X			(100/2)		// テクスチャサイズ
-#define TEXTURE_ITEM_SIZE_Y			(100/2)		// 同上
+#define TEXTURE_ITEM_SIZE_X			(100/6)		// テクスチャサイズ
+#define TEXTURE_ITEM_SIZE_Y			(100/6)		// 同上
 #define TEXTURE_PATTERN_DIVIDE_X_ITEM	(1)			// アニメパターンのテクスチャ内分割数（X)											// アニメパターンのテクスチャ内分割数（X)
 #define TEXTURE_PATTERN_DIVIDE_Y_ITEM	(1)			// アニメパターンのテクスチャ内分割数（Y)											// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM_ITEM			(TEXTURE_PATTERN_DIVIDE_X_ITEM*TEXTURE_PATTERN_DIVIDE_Y_ITEM)	// アニメーションパターン数
 #define TIME_ANIMATION_ITEM			(50)			// アニメーションの切り替わるカウント
-#define ITEM_MAX						(20)			// アイテムの最大数
+#define ITEM_MAX					(10)			// アイテムの最大数
 #define ITEM_SPEED					(6.0f)		// アイテムの移動スピード
 /*******************************************************************************
 * 構造体定義
@@ -37,6 +37,7 @@ typedef struct											// アイテムの構造体
 	float					Radius;						// ポリゴンの半径
 	float					BaseAngle = 0.0;			// ポリゴンの角度
 	int						type;
+	D3DXVECTOR3				abs_pos;					// ポリゴンの移動量
 } ITEM;
 //*****************************************************************************
 // プロトタイプ宣言

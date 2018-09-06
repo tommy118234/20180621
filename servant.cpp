@@ -1,6 +1,6 @@
 /*******************************************************************************
 * タイトル:		DirectXゲーム～はじめての個人作品～
-* プログラム名:	Servant処理 [SERVANT.cpp]
+* プログラム名:	Servant処理 [servant.cpp]
 * 作成者:		GP11B 16　徐　ワイ延
 * 作成開始日:	2018/07/24
 ********************************************************************************/
@@ -18,104 +18,103 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT MakeVertexSERVANT(int no);
-void SetTextureSERVANT(int no, int cntPattern);
-void SetVertexSERVANT(int no);
+HRESULT MakeVertexServant(int no);
+void SetTextureServant(int no, int cntPattern);
+void SetVertexServant(int no);
 
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureSERVANT = NULL;		// テクスチャへのポリゴン
-SERVANT					SERVANTWk[SERVANT_MAX];			// Servant構造体
-LPDIRECTSOUNDBUFFER8	g_pSE3;							// SE用バッファ
+LPDIRECT3DTEXTURE9		D3DTextureServant = NULL;		// テクスチャへのポリゴン
+SERVANT					ServantWk[SERVANT_MAX];			// Servant構造体
+LPDIRECTSOUNDBUFFER8	SE3;							// SE用バッファ
 
-int cooldown;
 //=============================================================================
 // 初期化処理
 //=============================================================================
-HRESULT InitSERVANT(int type)
+HRESULT InitServant(int type)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	SERVANT *SERVANT = &SERVANTWk[0];		// エネミーのポインターを初期化
+	SERVANT *servant = &ServantWk[0];		// エネミーのポインターを初期化
 	PLAYER *player = GetPlayer(0);
 
 
 
-	for (int i = 0; i < SERVANT_MAX; i++, SERVANT++) {
-		g_pSE3 = LoadSound(SE_01);
+	for (int i = 0; i < SERVANT_MAX; i++, servant++) {
+		//SE3 = LoadSound(SE_01);
 		// テクスチャーの初期化を行う？
 		if (type == 0)
 		{
 			// テクスチャの読み込み
 			D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 				TEXTURE_GAME_SERVANT,			// ファイルの名前
-				&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ
-			g_pSE3 = LoadSound(SE_00);
+				&D3DTextureServant);			// 読み込むメモリのポインタ
+			SE3 = LoadSound(SE_00);
 		}
 		else if (type == 1) {
-			UninitSERVANT;
+			UninitServant();
 		}
 
-		SERVANT->use = FALSE;									// 未使用（発射されていない弾）
-		SERVANT->pos = D3DXVECTOR3(-100.0f, 0.0f, 0.0f);			// 座標データを初期化
-		SERVANT->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			// 回転データを初期化
-		SERVANT->PatternAnim = 0;								// アニメパターン番号をランダムで初期化
-		SERVANT->CountAnim = 0;									// アニメカウントを初期化
+		servant->use = false;									// 未使用（発射されていない弾）
+		servant->pos = D3DXVECTOR3(-1000.0f, 0.0f, 0.0f);		// 座標データを初期化
+		servant->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			// 回転データを初期化
+		servant->PatternAnim = 0;								// アニメパターン番号をランダムで初期化
+		servant->CountAnim = 0;									// アニメカウントを初期化
 
-		SERVANT->BaseAngle = atan2f(TEXTURE_SERVANT_SIZE_Y, TEXTURE_SERVANT_SIZE_X);
-		D3DXVECTOR2 temp = D3DXVECTOR2(TEXTURE_SERVANT_SIZE_X / 2, TEXTURE_SERVANT_SIZE_Y / 2);
-		SERVANT->Radius = D3DXVec2Length(&temp);
+		servant->BaseAngle = atan2f(TEXTURE_SERVANT_SIZE_Y, TEXTURE_SERVANT_SIZE_X);
+		D3DXVECTOR2 temp   = D3DXVECTOR2(TEXTURE_SERVANT_SIZE_X / 2, TEXTURE_SERVANT_SIZE_Y / 2);
+		servant->Radius    = D3DXVec2Length(&temp);
 
-		SERVANT->Texture = g_pD3DTextureSERVANT;					// テクスチャ情報
-		MakeVertexSERVANT(i);									// 頂点情報の作成
+		servant->Texture = D3DTextureServant;					// テクスチャ情報
+		MakeVertexServant(i);									// 頂点情報の作成
 	}
-
 	return S_OK;
 }
 //=============================================================================
 // 終了処理
 //=============================================================================
-void UninitSERVANT(void)
+void UninitServant(void)
 {
-	if (g_pD3DTextureSERVANT != NULL)	//
+	if (D3DTextureServant != NULL)	//
 	{	// テクスチャの開放
-		g_pD3DTextureSERVANT->Release();
-		g_pD3DTextureSERVANT = NULL;
+		D3DTextureServant->Release();
+		D3DTextureServant = NULL;
 	}
-
-	if (g_pSE3 != NULL)
+	if (SE3 != NULL)
 	{	// テクスチャの開放
-		g_pSE3->Release();
-		g_pSE3 = NULL;
+		SE3->Release();
+		SE3 = NULL;
 	}
 }
 //=============================================================================
 // 更新処理
 //=============================================================================
-void UpdateSERVANT(void)
+void UpdateServant(void)
 {
-
-	SERVANT *servant = SERVANTWk;			// Servantのポインターを初期化
-	ENEMY *enemy = GetEnemy(0);
+	SERVANT *servant = ServantWk;			// Servantのポインターを初期化
+	ENEMY	*enemy = GetEnemy(0);
 	for (int i = 0; i < SERVANT_MAX; i++, servant++)
 	{
-		if (servant->use == true)			// 未使用状態のServantを見つける
+		if (servant->use)			// 未使用状態のServantを見つける
 		{
-			//// SERVANTの移動処理
-			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 > servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2 &&  servant->rot.z < 1.57 - atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2, BG00_SIZE_X/2 - servant->pos.x ))
-				servant->rot.z += 0.1;			
-			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 < servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2 && servant->rot.z > -(1.57 - atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2,servant->pos.x -  BG00_SIZE_X/2 )))
-				servant->rot.z -= 0.1;			
-			
-			if (cooldown < 1) {					
+			// SERVANTの移動処理
+			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 > servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2 &&  
+				servant->rot.z < 1.57 - atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2, BG00_SIZE_X/2 - servant->pos.x ))
+				servant->rot.z += 0.05;			
+			if (enemy->pos.x + TEXTURE_ENEMY_SIZE_X / 2 < servant->pos.x + TEXTURE_SERVANT_SIZE_X / 2 && 
+				servant->rot.z > -(1.57 - atan2f(servant->pos.y + TEXTURE_SERVANT_SIZE_Y / 2,servant->pos.x -  BG00_SIZE_X/2 )))
+				servant->rot.z -= 0.05;				
+			if (servant->bullet_count < 1)
+			{					
 				D3DXVECTOR3 pos = servant->pos;							
-				pos.x -= GetPlayer(0)->pos.x / 4.0f;				
+				//pos.x -= GetPlayer(0)->pos.x / 4.0f;	
+				//servant->pos.x = servant->abs_pos.x - GetPlayer(0)->pos.x / 4.0f;
 				SetBullet(pos, servant->rot.z,servant->status.ATK);	
-				cooldown = servant->bullet_cooldown;
+				servant->bullet_count = servant->bullet_cooldown;
 			}
 			else
 			{
-				cooldown--;
+				servant->bullet_count--;
 			}
 			// 画面外まで進んだ？
 			if (servant->pos.y < -TEXTURE_SERVANT_SIZE_Y)
@@ -123,168 +122,195 @@ void UpdateSERVANT(void)
 				servant->use = FALSE;
 				servant->pos.x = -100.0f;
 			}
-			SetVertexSERVANT(i);
+			SetVertexServant(i);
 		}
 	}
 }
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawSERVANT(void)
+void DrawServant(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	SERVANT *SERVANT = SERVANTWk;				// Servantのポインターを初期化
-
+	SERVANT *servant = ServantWk;				// Servantのポインターを初期化
 	// 頂点フォーマットの設定
 	pDevice->SetFVF(FVF_VERTEX_2D);
-
-	for (int i = 0; i < SERVANT_MAX; i++, SERVANT++)
+	for (int i = 0; i < SERVANT_MAX; i++, servant++)
 	{
-		if (SERVANT->use)					// 使用している状態なら更新する
+		if (servant->use)						// 使用している状態なら更新する
 		{
 			// テクスチャの設定
-			pDevice->SetTexture(0, SERVANT->Texture);
+			pDevice->SetTexture(0, servant->Texture);
 			// ポリゴンの描画
-			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_SERVANT, SERVANT->vertexWk, sizeof(VERTEX_2D));
+			pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, NUM_SERVANT, servant->vertexWk, sizeof(VERTEX_2D));
 		}
 	}
 }
 //=============================================================================
 // 頂点の作成
 //=============================================================================
-HRESULT MakeVertexSERVANT(int no)
+HRESULT MakeVertexServant(int no)
 {
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	SERVANT *SERVANT = &SERVANTWk[no];
-
+	SERVANT *servant = &ServantWk[no];
 	// 頂点座標の設定
-	SetVertexSERVANT(no);
+	SetVertexServant(no);
 	// rhwの設定
-	SERVANT->vertexWk[0].rhw =
-		SERVANT->vertexWk[1].rhw =
-		SERVANT->vertexWk[2].rhw =
-		SERVANT->vertexWk[3].rhw = 1.0f;
+	servant->vertexWk[0].rhw =
+	servant->vertexWk[1].rhw =
+	servant->vertexWk[2].rhw =
+	servant->vertexWk[3].rhw = 1.0f;
 	// 反射光の設定
-	SERVANT->vertexWk[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-	SERVANT->vertexWk[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-	SERVANT->vertexWk[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
-	SERVANT->vertexWk[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	servant->vertexWk[0].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	servant->vertexWk[1].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	servant->vertexWk[2].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
+	servant->vertexWk[3].diffuse = D3DCOLOR_RGBA(255, 255, 255, 255);
 	// テクスチャ座標の設定
-	SERVANT->vertexWk[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-	SERVANT->vertexWk[1].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_SERVANT, 0.0f);
-	SERVANT->vertexWk[2].tex = D3DXVECTOR2(0.0f, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_SERVANT);
-	SERVANT->vertexWk[3].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_SERVANT, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_SERVANT);
-
+	servant->vertexWk[0].tex = D3DXVECTOR2(0.0f, 0.0f);
+	servant->vertexWk[1].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_SERVANT, 0.0f);
+	servant->vertexWk[2].tex = D3DXVECTOR2(0.0f, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_SERVANT);
+	servant->vertexWk[3].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_SERVANT, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_SERVANT);
 	return S_OK;
 }
 //=============================================================================
 // 頂点座標の設定
 //=============================================================================
-void SetVertexSERVANT(int no)
+void SetVertexServant(int no)
 {
-	SERVANT *SERVANT = &SERVANTWk[no];			// Servantのポインターを初期化
-
+	SERVANT *servant = &ServantWk[no];			// Servantのポインターを初期化
 	// 頂点座標の設定
-	SERVANT->vertexWk[0].vtx = D3DXVECTOR3(SERVANT->pos.x - TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
-		SERVANT->pos.y - TEXTURE_SERVANT_SIZE_Y,
-		0);
-	SERVANT->vertexWk[1].vtx = D3DXVECTOR3(SERVANT->pos.x + TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
-		SERVANT->pos.y - TEXTURE_SERVANT_SIZE_Y,
-		0);
-	SERVANT->vertexWk[2].vtx = D3DXVECTOR3(SERVANT->pos.x - TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
-		SERVANT->pos.y + TEXTURE_SERVANT_SIZE_Y,
-		0);
-	SERVANT->vertexWk[3].vtx = D3DXVECTOR3(SERVANT->pos.x + TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
-		SERVANT->pos.y + TEXTURE_SERVANT_SIZE_Y,
-		0);
-
+	//servant->vertexWk[0].vtx = D3DXVECTOR3(servant->pos.x - TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
+	//	servant->pos.y - TEXTURE_SERVANT_SIZE_Y,
+	//	0);
+	//servant->vertexWk[1].vtx = D3DXVECTOR3(servant->pos.x + TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
+	//	servant->pos.y - TEXTURE_SERVANT_SIZE_Y,
+	//	0);
+	//servant->vertexWk[2].vtx = D3DXVECTOR3(servant->pos.x - TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
+	//	servant->pos.y + TEXTURE_SERVANT_SIZE_Y,
+	//	0);
+	//servant->vertexWk[3].vtx = D3DXVECTOR3(servant->pos.x + TEXTURE_SERVANT_SIZE_X - GetPlayer(0)->pos.x / 4.0f,
+	//	servant->pos.y + TEXTURE_SERVANT_SIZE_Y,
+	//	0);
+	servant->pos.x = servant->abs_pos.x - GetPlayer(0)->pos.x / 4.0f;
 	// 頂点座標の設定
-	SERVANT->vertexWk[0].vtx.x = SERVANT->pos.x - cosf(SERVANT->BaseAngle + SERVANT->rot.z) * SERVANT->Radius - GetPlayer(0)->pos.x / 4.0f;
-	SERVANT->vertexWk[0].vtx.y = SERVANT->pos.y - sinf(SERVANT->BaseAngle + SERVANT->rot.z) * SERVANT->Radius;
-	SERVANT->vertexWk[0].vtx.z = 0.0f;
-
-	SERVANT->vertexWk[1].vtx.x = SERVANT->pos.x + cosf(SERVANT->BaseAngle - SERVANT->rot.z) * SERVANT->Radius - GetPlayer(0)->pos.x / 4.0f;
-	SERVANT->vertexWk[1].vtx.y = SERVANT->pos.y - sinf(SERVANT->BaseAngle - SERVANT->rot.z) * SERVANT->Radius;
-	SERVANT->vertexWk[1].vtx.z = 0.0f;
-
-	SERVANT->vertexWk[2].vtx.x = SERVANT->pos.x - cosf(SERVANT->BaseAngle - SERVANT->rot.z) * SERVANT->Radius - GetPlayer(0)->pos.x / 4.0f;
-	SERVANT->vertexWk[2].vtx.y = SERVANT->pos.y + sinf(SERVANT->BaseAngle - SERVANT->rot.z) * SERVANT->Radius;
-	SERVANT->vertexWk[2].vtx.z = 0.0f;
-
-	SERVANT->vertexWk[3].vtx.x = SERVANT->pos.x + cosf(SERVANT->BaseAngle + SERVANT->rot.z) * SERVANT->Radius - GetPlayer(0)->pos.x / 4.0f;
-	SERVANT->vertexWk[3].vtx.y = SERVANT->pos.y + sinf(SERVANT->BaseAngle + SERVANT->rot.z) * SERVANT->Radius;
-	SERVANT->vertexWk[3].vtx.z = 0.0f;
+	servant->vertexWk[0].vtx.x = servant->pos.x - cosf(servant->BaseAngle + servant->rot.z) * servant->Radius;
+	servant->vertexWk[0].vtx.y = servant->pos.y - sinf(servant->BaseAngle + servant->rot.z) * servant->Radius;
+	servant->vertexWk[0].vtx.z = 0.0f;
+	servant->vertexWk[1].vtx.x = servant->pos.x + cosf(servant->BaseAngle - servant->rot.z) * servant->Radius;
+	servant->vertexWk[1].vtx.y = servant->pos.y - sinf(servant->BaseAngle - servant->rot.z) * servant->Radius;
+	servant->vertexWk[1].vtx.z = 0.0f;
+	servant->vertexWk[2].vtx.x = servant->pos.x - cosf(servant->BaseAngle - servant->rot.z) * servant->Radius;
+	servant->vertexWk[2].vtx.y = servant->pos.y + sinf(servant->BaseAngle - servant->rot.z) * servant->Radius;
+	servant->vertexWk[2].vtx.z = 0.0f;
+	servant->vertexWk[3].vtx.x = servant->pos.x + cosf(servant->BaseAngle + servant->rot.z) * servant->Radius;
+	servant->vertexWk[3].vtx.y = servant->pos.y + sinf(servant->BaseAngle + servant->rot.z) * servant->Radius;
+	servant->vertexWk[3].vtx.z = 0.0f;
 }
 //=============================================================================
 // テクスチャ座標の設定
 //=============================================================================
-void SetTextureSERVANT(int no, int cntPattern)
+void SetTextureServant(int no, int cntPattern)
 {
-	SERVANT *SERVANT = &SERVANTWk[no];			// Servantのポインターを初期化
-
+	SERVANT *servant = &ServantWk[no];			// Servantのポインターを初期化
 	// テクスチャ座標の設定
 	int x = cntPattern % TEXTURE_PATTERN_DIVIDE_X_SERVANT;
 	int y = cntPattern / TEXTURE_PATTERN_DIVIDE_X_SERVANT;
 	float sizeX = 1.0f / TEXTURE_PATTERN_DIVIDE_X_SERVANT;
 	float sizeY = 1.0f / TEXTURE_PATTERN_DIVIDE_Y_SERVANT;
 	// 頂点座標の設定
-	SERVANT->vertexWk[0].tex = D3DXVECTOR2((float)(x)* sizeX, (float)(y)* sizeY);
-	SERVANT->vertexWk[1].tex = D3DXVECTOR2((float)(x)* sizeX + sizeX, (float)(y)* sizeY);
-	SERVANT->vertexWk[2].tex = D3DXVECTOR2((float)(x)* sizeX, (float)(y)* sizeY + sizeY);
-	SERVANT->vertexWk[3].tex = D3DXVECTOR2((float)(x)* sizeX + sizeX, (float)(y)* sizeY + sizeY);
+	servant->vertexWk[0].tex = D3DXVECTOR2((float)(x)* sizeX, (float)(y)* sizeY);
+	servant->vertexWk[1].tex = D3DXVECTOR2((float)(x)* sizeX + sizeX, (float)(y)* sizeY);
+	servant->vertexWk[2].tex = D3DXVECTOR2((float)(x)* sizeX, (float)(y)* sizeY + sizeY);
+	servant->vertexWk[3].tex = D3DXVECTOR2((float)(x)* sizeX + sizeX, (float)(y)* sizeY + sizeY);
 }
-
 //=============================================================================
 // Servantの発射設定
 //=============================================================================
-void SetSERVANT(D3DXVECTOR3 pos, int type)
+void SetServant(D3DXVECTOR3 pos, int type)
 {
-	SERVANT *SERVANT = &SERVANTWk[0];			// Servantのポインターを初期化
+	SERVANT *servant = &ServantWk[0];				// Servantのポインターを初期化
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-
-
+	
 	// もし未使用の弾が無かったら発射しない( =これ以上撃てないって事 )
-	for (int i = 0; i < SERVANT_MAX; i++, SERVANT++)
+	for (int i = 0; i < SERVANT_MAX; i++, servant++)
 	{
-		if (SERVANT->use == false)			// 未使用状態のServantを見つける
+		if (!servant->use)							// 未使用状態のServantを見つける
 		{
-
-			SERVANT->use = true;				// 使用状態へ変更する
-
-			switch (type) {
+			servant->use = true;					// 使用状態へ変更する
+			switch (type) 
+			{
 			case 1:
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_SERVANT,			// ファイルの名前
-					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ	
-				SERVANT->status.ATK = 75;
-				SERVANT->bullet_cooldown = 50;
+					&D3DTextureServant);			// 読み込むメモリのポインタ	
+				servant->status.ATK = SERVANT_ATK_A;
+				servant->bullet_cooldown = SERVANT_COOLDOWN_A;
 				break;
 			case 2:
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_SERVANT2,			// ファイルの名前
-					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ	
-				SERVANT->status.ATK = 100;
-
-				SERVANT->bullet_cooldown = 70;
+					&D3DTextureServant);			// 読み込むメモリのポインタ	
+				servant->status.ATK = SERVANT_ATK_B;
+				servant->bullet_cooldown = SERVANT_COOLDOWN_B;
 				break;
 			case 3:
 				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
 					TEXTURE_GAME_SERVANT3,			// ファイルの名前
-					&g_pD3DTextureSERVANT);			// 読み込むメモリのポインタ
-				SERVANT->status.ATK = 250;	
-				SERVANT->bullet_cooldown = 100;
+					&D3DTextureServant);			// 読み込むメモリのポインタ
+				servant->status.ATK = SERVANT_ATK_C;
+				servant->bullet_cooldown = SERVANT_COOLDOWN_C;
 				break;		
 			}
 			// 召喚音再生
-			g_pSE3 = LoadSound(18+type);			
-			if (IsPlaying(g_pSE3))
-				g_pSE3->SetCurrentPosition(0);
+			SE3 = LoadSound(18+type);			
+			if (IsPlaying(SE3))
+				SE3->SetCurrentPosition(0);
 			else {
-				PlaySound(g_pSE3, E_DS8_FLAG_NONE);
+				PlaySound(SE3, E_DS8_FLAG_NONE);
 			}
-			SERVANT->Texture = g_pD3DTextureSERVANT;					// テクスチャ情報			
-			SERVANT->pos = pos;				// 座標をセット			
-			return;							// 1発セットしたので終了する
+			servant->Texture = D3DTextureServant;	// テクスチャ情報			
+			servant->pos = pos;						// 座標をセット		serva
+			servant->abs_pos = pos;
+			return;									// 1発セットしたので終了する
+		}
+		if (!servant->use)							// 未使用状態のServantを見つける
+		{
+			servant->use = true;					// 使用状態へ変更する
+			switch (type) 
+			{
+			case 1:
+				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
+					TEXTURE_GAME_SERVANT,			// ファイルの名前
+					&D3DTextureServant);			// 読み込むメモリのポインタ	
+				servant->status.ATK = SERVANT_ATK_A;
+				servant->bullet_cooldown = SERVANT_COOLDOWN_A;
+				break;
+			case 2:
+				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
+					TEXTURE_GAME_SERVANT2,			// ファイルの名前
+					&D3DTextureServant);			// 読み込むメモリのポインタ	
+				servant->status.ATK = SERVANT_ATK_B;
+				servant->bullet_cooldown = SERVANT_COOLDOWN_B;
+				break;
+			case 3:
+				D3DXCreateTextureFromFile(pDevice,	// デバイスのポインタ
+					TEXTURE_GAME_SERVANT3,			// ファイルの名前
+					&D3DTextureServant);			// 読み込むメモリのポインタ
+				servant->status.ATK = SERVANT_ATK_C;
+				servant->bullet_cooldown = SERVANT_COOLDOWN_C;
+				break;		
+			}
+			// 召喚音再生
+			SE3 = LoadSound(18+type);			
+			if (IsPlaying(SE3))
+				SE3->SetCurrentPosition(0);
+			else {
+				PlaySound(SE3, E_DS8_FLAG_NONE);
+			}
+			servant->Texture = D3DTextureServant;	// テクスチャ情報			
+			servant->pos = pos;						// 座標をセット		serva
+			servant->abs_pos = pos;
+			return;									// 1発セットしたので終了する
 		}
 	}
 }
@@ -294,7 +320,7 @@ void SetSERVANT(D3DXVECTOR3 pos, int type)
 戻り値:	SERVANT *
 説明:	SERVANTのアドレスを取得する
 *******************************************************************************/
-SERVANT *GetSERVANT(int pno)
+SERVANT *GetServant(int pno)
 {
-	return &SERVANTWk[pno];
+	return &ServantWk[pno];
 }
