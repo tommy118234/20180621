@@ -349,6 +349,8 @@ void UpdateEnemy(void)
 
 				if (!overlap2)
 				SetItem(pos, rand() % 3);
+
+				srand((unsigned)time(NULL));
 				//last_pos = pos;
 			}
 

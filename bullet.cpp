@@ -50,7 +50,7 @@ HRESULT InitBullet(int type)
 			//g_pSE = LoadSound(SE_00);
 		}
 		else if (type == 1) {
-			UninitBullet();
+			//UninitBullet();
 		}						
 		bullet->use = FALSE;									// 未使用（発射されていない弾）
 		bullet->pos = D3DXVECTOR3(-100.0f, 0.0f, 0.0f);			// 座標データを初期化

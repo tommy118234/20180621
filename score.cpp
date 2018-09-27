@@ -45,7 +45,7 @@ HRESULT InitScore(int type)
 			&g_pD3DTextureScore);				// 読み込むメモリのポインタ
 	}
 	else if (type == 1) {
-		UninitScore;
+		//UninitScore;
 		// テクスチャの読み込み
 		D3DXCreateTextureFromFile(pDevice,		// デバイスのポインタ
 			TEXTURE_GAME_SCORE00,				// ファイルの名前

@@ -11,7 +11,7 @@
 #define TEXTURE_GAME_BG01		_T("data/BG/story1.png")		// ”wŒi‰æ‘œ2
 #define TEXTURE_GAME_BG02		_T("data/BG/story2.png")		// ”wŒi‰æ‘œ3
 #define TEXTURE_GAME_BG03		_T("data/BG/battleGuide.png")	// ”wŒi‰æ‘œ4
-#define TEXTURE_GAME_BG04		_T("data/BG/battle_ice.png")	// ”wŒi‰æ‘œ5
+#define TEXTURE_GAME_BG04		_T("data/BG/battle_ice5.png")	// ”wŒi‰æ‘œ5
 #define TEXTURE_GAME_BG05		_T("data/BG/ice_castle.png")	// ”wŒi‰æ‘œ6
 #define TEXTURE_GAME_BG06		_T("data/BG/moon_red.png")		// ”wŒi‰æ‘œ7
 #define BG00_SIZE_X				(800)							// ƒeƒNƒXƒ`ƒƒƒTƒCƒY

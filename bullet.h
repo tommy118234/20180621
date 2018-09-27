@@ -8,7 +8,7 @@
 #define _BULLET_H_
 // マクロ定義
 #define	NUM_BULLET						(2)			// ポリゴン数
-#define TEXTURE_GAME_BULLET				_T("data/TEXTURE/bullet.png")	// サンプル用画像
+#define TEXTURE_GAME_BULLET				_T("data/TEXTURE/bullet2.png")	// サンプル用画像
 #define TEXTURE_BULLET_SIZE_X			(20)		// テクスチャサイズ
 #define TEXTURE_BULLET_SIZE_Y			(20)		// 同上
 #define TEXTURE_PATTERN_DIVIDE_X_BULLET	(1)			// アニメパターンのテクスチャ内分割数（X)

@@ -169,7 +169,9 @@ void UpdatePlayer(void)
 			
 
 			// キーボード入力で移動
-			if (GetKeyboardPress(DIK_DOWN) && player->gravity == 0) {
+			if ((GetKeyboardPress(DIK_DOWN) && player->gravity == 0)||
+				(IsButtonPressed(0, BUTTON_DOWN) && player->gravity == 0))			
+			{
 				if (player->gravity == 0)
 				{
 					player->moving_cooldown = 1;
@@ -180,7 +182,8 @@ void UpdatePlayer(void)
 				}
 				player->pos.y += 5;
 			}
-			if (GetKeyboardPress(DIK_UP)) 
+			if (GetKeyboardPress(DIK_UP)||
+				IsButtonPressed(0, BUTTON_UP))
 			{
 				if (player->gravity != 0 && !jump_cooldown && player->acceleration == 0)
 				{
@@ -231,7 +234,9 @@ void UpdatePlayer(void)
 				}
 			}
 
-			if (GetKeyboardPress(DIK_LEFT)) {
+			if (GetKeyboardPress(DIK_LEFT)||
+				IsButtonPressed(0, BUTTON_LEFT)
+				) {
 				if (player->gravity != 0) {
 					player->moving_cooldown = 1;
 					player->direction = -1;
@@ -241,7 +246,9 @@ void UpdatePlayer(void)
 					player->rot.z -= 0.1f;
 				}
 			}
-			if (GetKeyboardPress(DIK_RIGHT)) {
+			if (GetKeyboardPress(DIK_RIGHT)||
+				IsButtonPressed(0, BUTTON_RIGHT)
+				) {
 				if (player->gravity != 0) {
 					player->moving_cooldown = 1;
 					player->direction = 1;
@@ -255,7 +262,6 @@ void UpdatePlayer(void)
 			// MP消費召喚
 			if (player->gravity == 0)
 			{				
-
 				SERVANT *servant = GetServant(0);
 				for (int i = 0; i < SERVANT_MAX; i++, servant++)
 				{
@@ -267,7 +273,9 @@ void UpdatePlayer(void)
 				}
 
 				// 召喚 1
-				if (GetKeyboardPress(DIK_Q) && (player->bullet_cooldown == 0) && !overlap)
+				if ((GetKeyboardPress(DIK_Q)||
+					IsButtonPressed(0, BUTTON_A))
+					&& (player->bullet_cooldown == 0) && !overlap)
 				{
 					player->bullet_cooldown += 5;
 					if (player->status.MP > 20 )
@@ -280,7 +288,9 @@ void UpdatePlayer(void)
 					}
 				}
 				// 召喚 2
-				if (GetKeyboardPress(DIK_W) && (player->bullet_cooldown == 0) && !overlap)
+				if ((GetKeyboardPress(DIK_W) ||
+					IsButtonPressed(0, BUTTON_X))
+					&& (player->bullet_cooldown == 0) && !overlap)
 				{
 					player->bullet_cooldown += 5;
 					if (player->status.MP > 40)
@@ -293,7 +303,9 @@ void UpdatePlayer(void)
 					}
 				}
 				// 召喚 3
-				if (GetKeyboardPress(DIK_E) && (player->bullet_cooldown == 0) && !overlap)
+				if ((GetKeyboardPress(DIK_E) ||
+					IsButtonPressed(0, BUTTON_C))
+					&& (player->bullet_cooldown == 0) && !overlap)
 				{
 					player->bullet_cooldown += 5;
 					if (player->status.MP > 60)
@@ -308,7 +320,9 @@ void UpdatePlayer(void)
 				
 			}
 			// スキル 1
-			if (GetKeyboardPress(DIK_A) && (player->skill1_cooldown == 0) && player->status.MP >= 20 && player->status.ATK <= 500)
+			if ((GetKeyboardPress(DIK_A) ||
+				IsButtonPressed(0, BUTTON_R))				
+				&& (player->skill1_cooldown == 0) && player->status.MP >= 20 && player->status.ATK <= 500)
 			{
 
 				// スキル音再生
@@ -333,7 +347,10 @@ void UpdatePlayer(void)
 				player->skill1_cooldown = 100;
 			}
 			// スキル 2
-			if (GetKeyboardPress(DIK_S) && (player->skill2_cooldown == 0) && player->status.MP >= 50 && player->status.DEF <= 250)
+			if ((GetKeyboardPress(DIK_S) ||
+				IsButtonPressed(0, BUTTON_L))
+				
+				&& (player->skill2_cooldown == 0) && player->status.MP >= 50 && player->status.DEF <= 250)
 			{
 				// スキル音再生
 				g_pSE2 = LoadSound(17);
@@ -349,7 +366,10 @@ void UpdatePlayer(void)
 				player->skill2_cooldown = 100;
 			}
 			// スキル 3
-			if (GetKeyboardPress(DIK_D) && (player->skill3_cooldown == 0) && player->status.HP > 50)
+			if ((GetKeyboardPress(DIK_D) ||
+				IsButtonPressed(0, BUTTON_Y) ||
+				IsButtonPressed(0, BUTTON_Z))
+				&& (player->skill3_cooldown == 0) && player->status.HP > 50)
 			{
 				g_pSE2 = LoadSound(18);
 				// スキル音再生
@@ -365,38 +385,11 @@ void UpdatePlayer(void)
 				player->skill3_cooldown = 20;
 			}
 
-			// 攻撃モードスウィッチ
-			//if (GetKeyboardPress(DIK_F))
-			//{
-			//	// 攻撃モードに変換				
-			//	player->direction = 1;
-			//}
-			//if (GetKeyboardPress(DIK_T))
-			//{
-			//	// 召喚モードに変換					
-			//	player->direction = -1;
-			//}
-			// ゲームパッドでで移動処理
-			//if (IsButtonPressed(0, BUTTON_DOWN))
-			//{
-			//	player->pos.y += 2.0f;
-			//}
-			//else if (IsButtonPressed(0, BUTTON_UP))
-			//{
-			//	player->pos.y -= 2.0f;
-			//}
-			//
-			//if (IsButtonPressed(0, BUTTON_RIGHT))
-			//{
-			//	player->pos.x += 2.0f;
-			//}
-			//else if (IsButtonPressed(0, BUTTON_LEFT))
-			//{
-			//	player->pos.x -= 2.0f;
-			//}
 
 			//弾発射
-			if (GetKeyboardPress(DIK_SPACE) && (player->bullet_cooldown == 0) && player->direction == 1)
+			if ((GetKeyboardPress(DIK_SPACE) ||
+				IsButtonPressed(0, BUTTON_B))
+				&& (player->bullet_cooldown == 0))
 			{
 				player->bullet_cooldown += 20;
 				D3DXVECTOR3 pos = player->pos;
@@ -459,7 +452,7 @@ void DrawPlayer(void)
 				const char* strings2[] = { "戦闘演習を始まりますか？(Enter)" };
 				D3DCOLOR colors2[] = { D3DCOLOR_ARGB(255, 255, 255, 255) };
 				RECT r2 = { 0  , 0 ,SCREEN_WIDTH,SCREEN_HEIGHT/2 }; // starting point
-				font2->DrawText(NULL, strings2[0], -1, &r2, DT_CENTER|DT_VCENTER, colors2[0]);
+				//font2->DrawText(NULL, strings2[0], -1, &r2, DT_CENTER|DT_VCENTER, colors2[0]);
 				//for (int i = 0; i < _countof(strings2); ++i)
 				//{
 				//	font2->DrawText(NULL, strings2[i], -1, &r2, DT_CALCRECT, 0);

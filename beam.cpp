@@ -43,7 +43,7 @@ HRESULT InitBeam(int type)
 			&D3DTextureBeam);							// 読み込むメモリのポインタ			
 		}
 		else if (type == 1) {
-			UninitBeam();
+			//UninitBeam();
 		}
 		beam->use = FALSE;								// 未使用（発射されていない弾）
 		beam->pos = D3DXVECTOR3(-100.0f, 0.0f, 0.0f);	// 座標データを初期化

@@ -393,12 +393,14 @@ void Update(void)
 	switch (g_nStage)
 	{
 	case STAGE_TITLE:
-		if (GetKeyboardTrigger(DIK_RETURN))
+		if (GetKeyboardTrigger(DIK_RETURN) ||
+			IsButtonTriggered(0, BUTTON_START))// ゲームパッド
 		SwitchBG(1);
 		UpdateTitle();		
 		break;
 	case STAGE_TUTOR:			
-		if (GetKeyboardTrigger(DIK_RETURN))
+		if (GetKeyboardTrigger(DIK_RETURN) ||
+			IsButtonTriggered(0, BUTTON_START))	// ゲームパッド
 		{// Enter押したら、ステージを切り替える
 			switch (page){
 			case 1:
@@ -419,16 +421,7 @@ void Update(void)
 				SetStage(STAGE_GAME);
 				break;
 			}
-		}
-		// ゲームパッドでで移動処理
-		else if (IsButtonTriggered(0, BUTTON_START))
-		{
-			SetStage(STAGE_GAME);
-		}
-		else if (IsButtonTriggered(0, BUTTON_B))
-		{
-			SetStage(STAGE_GAME);
-		}
+		}		
 		// プレイヤーの更新処理
 		UpdatePlayer();		
 		// BGの更新処理
@@ -454,19 +447,13 @@ void Update(void)
 		// スコアの更新処理
 		UpdateScore();		
 		break;
-	case STAGE_GAME_END:		
-		//// スコアの更新処理
-		//UpdateScore();
-		
-		if (GetKeyboardTrigger(DIK_RETURN))
+	case STAGE_GAME_END:				
+		if (GetKeyboardTrigger(DIK_RETURN) ||
+			IsButtonTriggered(0, BUTTON_START) ||
+			IsButtonTriggered(0, BUTTON_B)
+			)
 		{// Enter押したら、ステージを切り替える
 			InitGame();				// ゲームの再初期化処理
-			SetBGM(9);
-			SetStage(STAGE_RESULT);
-		}
-		else if (IsButtonTriggered(0, BUTTON_B))
-		{
-			InitGame();				// ゲームの再初期化処理	
 			SetBGM(9);
 			SetStage(STAGE_RESULT);
 		}
@@ -482,8 +469,6 @@ void Update(void)
 //=============================================================================
 void Draw(void)
 {
-
-
 	PLAYER *player = GetPlayer(0);
 	// バックバッファ＆Ｚバッファのクリア
 	g_pD3DDevice->Clear(0, NULL, (D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(128, 128, 255, 0), 1.0f, 0);	
@@ -857,12 +842,13 @@ bool CheckHitBC(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float radius1, float radius2
 //=============================================================================
 void InitGame(void)
 {
+	//Uninit();
 	InitBG(1);			// BGの再初期化
 	InitBeam(1);		// Beamの再初期化
 	InitItem(1);		// Beamの再初期化
 	InitBullet(1);		// バレットの再初期化
 	InitServant(1);		// バレットの再初期化
-	//InitEnemy(1);		// エネミーの再初期化
+	InitEnemy(1);		// エネミーの再初期化
 	InitPlayer(1);		// プレイヤーの再初期化	
 	InitResult();	
 	//InitScore(1);		// スコアの再初期化		

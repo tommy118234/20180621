@@ -84,7 +84,9 @@ void UninitTitle(void)
 //=============================================================================
 void UpdateTitle(void)
 {
-	if (GetKeyboardTrigger(DIK_RETURN) )
+	if (GetKeyboardTrigger(DIK_RETURN) ||
+		IsButtonTriggered(0, BUTTON_B)// ゲームパッド
+		)
 	{// Enter押したら、ステージを切り替える	
 	
 		SetStage(1);		
@@ -92,7 +94,9 @@ void UpdateTitle(void)
 		//SetStage(STAGE_GAME);
 		SetBGM(2);
 	}
-	if (GetKeyboardTrigger(DIK_N))
+	if (GetKeyboardTrigger(DIK_N) ||
+		IsButtonTriggered(0, BUTTON_X)// ゲームパッド
+		)
 	{// N押したら、ステージを切り替える		
 		//SetStage(STAGE_TUTOR);
 		GetPlayer(0)->ready = 2;
@@ -101,17 +105,6 @@ void UpdateTitle(void)
 		SwitchBG(4);
 		SetBGM(3);
 		SetStage(STAGE_GAME);
-	}
-	// ゲームパッドでで移動処理
-	else if (IsButtonTriggered(0, BUTTON_START))
-	{
-		SetStage(STAGE_TUTOR);
-		//SetStage(STAGE_GAME);
-	}
-	else if (IsButtonTriggered(0, BUTTON_B))
-	{
-		SetStage(STAGE_TUTOR);
-		//SetStage(STAGE_GAME);
 	}	
 }
 
@@ -143,10 +136,10 @@ void DrawTitle(void)
 	// 文字の描画		
 
 	const char* strings[] = { "'Enter'で始まる,\n'N'で教学スキップ","制作：TSUI\n音楽:Music is VFR	魔王魂" };
-	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 120, 20, 70), D3DCOLOR_ARGB(255, 237, 200, 50)};
+	D3DCOLOR colors[] = { D3DCOLOR_ARGB(255, 120, 20, 70), D3DCOLOR_ARGB(255, 240, 170, 18)};
 	RECT r = { 0  , SCREEN_HEIGHT / 4 ,SCREEN_WIDTH,SCREEN_HEIGHT }; // starting point
 	RECT r2 = { 0 , 2* SCREEN_HEIGHT/3 ,SCREEN_WIDTH/2,SCREEN_HEIGHT}; // starting point	
-	font->DrawText(NULL, strings[0], -1, &r, DT_CENTER | DT_VCENTER, colors[0]);
+	font->DrawText(NULL, strings[0], -1, &r, DT_CENTER | DT_VCENTER, colors[1]);
 	//font->DrawText(NULL, strings[1], -1, &r2, DT_CENTER | DT_VCENTER, colors[1]);
 
 
